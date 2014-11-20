@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Gibraltar.Agent.Web.JavaScript</id>
+        <version>0.1.0.5</version>
+        <title>Gibraltar Loupe Agent for JavaScript and Angular</title>
+        <authors>Gibraltar Software</authors>
+        <owners>Gibraltar Software</owners>
+        <licenseUrl>https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/blob/master/LICENSE.txt</licenseUrl>
+        <projectUrl>https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript</projectUrl>
+        <iconUrl>http://www.gibraltarsoftware.com/loupe.ico</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Records error and tracing information for JavaScript and Angular.  Designed for use in a production environment, it extends the Loupe Web Agent with features specific to JavaScript and Angular.</description>
+        <tags>Loupe Logging ASP.NET MVC</tags>
+        <dependencies>
+          <dependency id="WebActivatorEx" version="2.0.5" />
+          <dependency id="Newtonsoft.Json" version="4.5.11" />
+          <dependency id="Gibraltar.Agent" version="3.7.0.2102" />
+          <dependency id="Gibraltar.Agent.Web.Mvc" version="3.7.0.2102" />
+        </dependencies> 
+    </metadata>
+    <files>
+        <file src="Content\App_Start\Gibraltar_RouteConfig.cs.pp" target="Content\App_Start\Gibraltar_RouteConfig.cs.pp" />
+        <file src="Content\Scripts\Gibraltar\Gibraltar.Agent.Angular.js" target="Content\Scripts\Gibraltar\Gibraltar.Agent.Angular.js" />
+        <file src="Content\Scripts\Gibraltar\Gibraltar.Agent.NativeScript.js" target="Content\Scripts\Gibraltar\Gibraltar.Agent.NativeScript.js" />
+        <file src="Content\Scripts\Gibraltar\platform.js" target="Content\Scripts\Gibraltar\platform.js" />
+        <file src="Content\Scripts\Gibraltar\stacktrace.js" target="Content\Scripts\Gibraltar\stacktrace.js" />
+        <file src="bin\Debug\Agent.Web.JavaScript.dll" target="lib\net40\Agent.Web.JavaScript.dll" />
+    </files>
+</package>
