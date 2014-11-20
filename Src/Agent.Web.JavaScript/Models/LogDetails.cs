@@ -1,6 +1,4 @@
-using Gibraltar.Agent;
-
-namespace Agent.Web.JavaScript.Models
+namespace Gibraltar.Agent.Web.JavaScript.Models
 {
     public class LogDetails
     {

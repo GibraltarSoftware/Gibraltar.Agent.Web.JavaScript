@@ -2,12 +2,11 @@
 using System.IO;
 using System.Security.Principal;
 using System.Xml;
-using Agent.Web.JavaScript.Internal;
-using Gibraltar.Agent;
+using Gibraltar.Agent.Web.JavaScript.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Agent.Web.JavaScript.Models
+namespace Gibraltar.Agent.Web.JavaScript.Models
 {
     /// <summary>
     /// Logs a JavaScript error to the Gibraltar Loupe Agent

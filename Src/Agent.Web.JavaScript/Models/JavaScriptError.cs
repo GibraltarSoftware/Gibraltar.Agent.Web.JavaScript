@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Agent.Web.JavaScript.Models
+namespace Gibraltar.Agent.Web.JavaScript.Models
 {
     /// <summary>
     /// Details of a JavaScript error

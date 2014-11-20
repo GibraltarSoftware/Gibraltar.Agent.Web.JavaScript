@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Web.Http.Dispatcher;
-using Agent.Web.JavaScript.Controllers;
+using Gibraltar.Agent.Web.JavaScript.Controllers;
 
-namespace Agent.Web.JavaScript.Internal
+namespace Gibraltar.Agent.Web.JavaScript.Internal
 {
-    public class LoupeAssemblyResolver : DefaultAssembliesResolver
+    internal class LoupeAssemblyResolver : DefaultAssembliesResolver
     {
         /// <summary>
         /// Resolves the Gibraltar Loupe logging controller

@@ -1,13 +1,12 @@
 ﻿using System.Text.RegularExpressions;
-using Agent.Web.JavaScript.Models;
-using Gibraltar.Agent;
+using Gibraltar.Agent.Web.JavaScript.Models;
 
-namespace Agent.Web.JavaScript.Internal
+namespace Gibraltar.Agent.Web.JavaScript.Internal
 {
     /// <summary>
     /// Message source provider for JavaScript exceptions
     /// </summary>
-    public class JavaScriptSourceProvider : IMessageSourceProvider
+    internal class JavaScriptSourceProvider : IMessageSourceProvider
     {
         private readonly string _fileName;
         private readonly int _lineNumber;

@@ -25,6 +25,6 @@
         <file src="Content\Scripts\Gibraltar\Gibraltar.Agent.NativeScript.js" target="Content\Scripts\Gibraltar\Gibraltar.Agent.NativeScript.js" />
         <file src="Content\Scripts\Gibraltar\platform.js" target="Content\Scripts\Gibraltar\platform.js" />
         <file src="Content\Scripts\Gibraltar\stacktrace.js" target="Content\Scripts\Gibraltar\stacktrace.js" />
-        <file src="bin\Debug\Agent.Web.JavaScript.dll" target="lib\net40\Agent.Web.JavaScript.dll" />
+        <file src="bin\Release\Gibraltar.Agent.Web.JavaScript.pdb" target="lib\net40\Gibraltar.Agent.Web.JavaScript.pdb" />
     </files>
 </package>

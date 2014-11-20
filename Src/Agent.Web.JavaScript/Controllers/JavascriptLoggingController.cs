@@ -1,7 +1,7 @@
 ﻿using System.Web.Http;
-using Agent.Web.JavaScript.Models;
+using Gibraltar.Agent.Web.JavaScript.Models;
 
-namespace Agent.Web.JavaScript.Controllers
+namespace Gibraltar.Agent.Web.JavaScript.Controllers
 {
     /// <summary>
     /// Logs a JavaScript error to the Gibraltar Loupe Agent
@@ -19,7 +19,7 @@ namespace Agent.Web.JavaScript.Controllers
         }
 
         /// <summary>
-        /// Log a Javascript message
+        /// Log a JavaScript message
         /// </summary>
         /// <param name="details">The message details</param>
         [HttpPost]
