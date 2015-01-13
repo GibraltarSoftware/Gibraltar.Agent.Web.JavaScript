@@ -19,7 +19,7 @@
         };
 
         function targetUrl(endpoint) {
-            return $window.location.origin + targets.base + endpoint;
+            return targets.base + endpoint;
         }
 
         function getRoute() {
