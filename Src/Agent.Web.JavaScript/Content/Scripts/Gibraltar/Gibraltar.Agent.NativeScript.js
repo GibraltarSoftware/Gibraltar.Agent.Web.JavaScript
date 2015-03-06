@@ -2,9 +2,10 @@
     'use strict';
 
     var existingOnError = window.onerror;
-    window.printStackTrace = StackTrace();
 
     var propagateOnError = false;
+
+    var clientPlatform = new Platform();
 
     var targets = {
         base: "/Gibraltar/Log/",
@@ -58,7 +59,6 @@
     }
 
     function getPlatform() {
-        var clientPlatform = new Platform();
         clientPlatform.size = {
             width: window.innerWidth || document.body.clientWidth,
             height: window.innerHeight || document.body.clientHeight
