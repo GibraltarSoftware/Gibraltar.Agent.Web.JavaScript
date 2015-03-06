@@ -2,7 +2,6 @@
     'use strict';
 
     var existingOnError = window.onerror;
-    window.printStackTrace = StackTrace();
 
     var propagateOnError = false;
 
