@@ -59,6 +59,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -68,10 +69,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="jasmine.css" />
+    <Content Include="jasmine_favicon.png" />
     <Content Include="Jasmine_Test_Runner.html" />
+    <Content Include="Scripts\boot.js" />
     <Content Include="Scripts\jasmine-html.js" />
     <Content Include="Scripts\jasmine.js" />
-    <Content Include="Scripts\mock-ajax.js" />
+    <Content Include="Scripts\sinon-1.9.1.js" />
+    <Content Include="specs\When_logging_simple_uncaught_error.js" />
     <Content Include="specs\When_logging_messages.js" />
     <Content Include="specs\When_application_starts.js" />
     <Content Include="Web.config" />
