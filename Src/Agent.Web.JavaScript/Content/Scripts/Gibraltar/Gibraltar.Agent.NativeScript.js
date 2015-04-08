@@ -1,11 +1,9 @@
 ﻿(function (gibraltar, window) {
-    'use strict';
 
 
     var existingOnError = window.onerror;
 
-    var propagateOnError = false;
-
+    var propagateError = false;
 
     var targets = {
         base: "/Gibraltar/Log/",
@@ -27,7 +25,7 @@
 
     gibraltar.agent = {
         log: log,
-        propagateOnError: propagateOnError
+        propagateOnError: propagateError
     };
 
     return gibraltar.agent;
@@ -42,19 +40,24 @@
 
     function setUpOnError(window) {
         if (typeof window.onerror === 'undefined') {
-            console.log('Gibraltar Loupe JavaScript Logger: No onerror event; errors cannot be logged to Loupe');
+            consoleLog('Gibraltar Loupe JavaScript Logger: No onerror event; errors cannot be logged to Loupe');
             return;
         }
 
-        window.onerror = function (msg, url, line, column, error) {
+        window.onerror = function(msg, url, line, column, error) {
 
             if (existingOnError) {
                 existingOnError.apply(this, arguments);
             }
 
             setTimeout(logError, 10, msg, url, line, column, error);
-            return !propagateOnError;
-        }
+
+            // if we want to propagate the error the browser needs
+            // us to return false but logically we want to state we
+            // want to propagate i.e. true, so we reverse the bool
+            // so users can set as they expect not how browser expects
+            return !gibraltar.agent.propagateOnError;
+        };
 
     }
 
@@ -84,25 +87,70 @@
                 // deliberately swallow; some browsers don't expose the stack property on the exception
             }
         } else {
+            // remove trailing new line
+            if (error.stack.substring(error.stack.length - 1) == "\n") {
+                error.stack = error.stack.substring(0, error.stack.length - 1);
+            }
             stackTraceDetails = error.stack.split("\n");
         }
-        return stackTraceDetails;
+        return stripLoupeStackFrames(stackTraceDetails);
+    }
+
+
+    function stripLoupeStackFrames(stack) {
+
+        // if we error is from a simple throw statement and not an error then
+        // stackTrace.js will have added methods from here so we need to remove
+        // them otherwise will be reported in Loupe
+        if (stack) {
+
+            var userFramesStartPosition = userFramesStartAt(stack);
+
+            if (userFramesStartPosition > 0) {
+                // strip all loupe related frames from stack
+                stack = stack.slice(userFramesStartPosition);
+            }
+        }
+
+        return stack;
+    }
+
+    function userFramesStartAt(stack) {
+        var loupeMethods = ["logError", "getStackTrace", "printStackTrace"];
+        var position = 0;
+
+        if (stack[0].indexOf("Cannot access caller") > -1) {
+            position++;
+        }
+
+        for (; position < loupeMethods.length; position++) {
+
+            if (stack.length < position) {
+                break;
+            }
+
+            if (stack[position].indexOf(loupeMethods[position]) === -1) {
+                break;
+            }
+        }
+
+        return position;
     }
 
     function logError(msg, url, line, column, error) {
         var target = targetUrl(targets.exception);
+
         var errorDetails = {
             Category: "JavaScript",
             Message: msg,
             Url: url,
-            StackTrace: "",
+            StackTrace: getStackTrace(error, msg),
             Cause: "",
             Line: line,
             Column: column,
             Details: ""
         };
 
-        errorDetails.StackTrace = getStackTrace(error, msg);
         errorDetails.Details = JSON.stringify({ Client: getPlatform() });
 
         return sendLog(target, errorDetails);
@@ -127,16 +175,16 @@
 
     function sendLog(target, errorDetails) {
         try {
-            if (typeof (XMLHttpRequest) == "undefined") {
+            if (typeof (XMLHttpRequest) === "undefined") {
                 console.log("Gibraltar Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
                 return false;
             }
 
-            console.log(errorDetails);
+            consoleLog(errorDetails);
 
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4) {
+                if (xhr.readyState === 4) {
                     // finished loading
                     if (xhr.status < 200 || xhr.status > 206) {
                         console.log("Loupe JavaScript Logger: Failed to log to " + target);
@@ -149,12 +197,19 @@
             xhr.send(JSON.stringify(errorDetails));
 
         } catch (e) {
-            console.log("Gibraltar Loupe JavaScript Logger: Exception while attempting to log to " + target);
+            consoleLog("Gibraltar Loupe JavaScript Logger: Exception while attempting to log to " + target);
             console.dir(e);
             return false;
         }
 
         return true;
+    }
+
+    function consoleLog(msg) {
+        var console = window.console;
+        if (console && typeof console.log === 'function') {
+            console.log(msg);
+        }
     }
 
 })(window.gibraltar = window.gibraltar || {}, window);

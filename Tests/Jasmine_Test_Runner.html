@@ -12,14 +12,21 @@
     <script src="/Scripts/boot.js"></script>
     <script src="/Scripts/sinon-1.9.1.js"></script>
 
+    <script src="Scripts/fakeErrorHandler.js"></script>
+
     <!-- include source files here... -->
+    <script src="Scripts/stacktrace.js"></script>
+    <script src="/Scripts/platform.js"></script>
     <script src="/Scripts/Gibraltar.Agent.NativeScript.js"></script>
-    <!--<script src="/Scripts/platform.js"></script>-->
+
 
     <!-- include spec files here... -->
     <script src="specs/When_application_starts.js"></script>
     <script src="specs/When_logging_messages.js"></script>
-    <script src="specs/When_logging_simple_uncaught_error.js"></script>
+    <script src="specs/When_logging_exception.js"></script>
+    <script src="specs/When_user_is_handling_error.js"></script>
+    <script src="specs/When_existing_window_onerror_exists.js"></script>
+    <script src="specs/When_logging_stack_trace.js"></script>
 
 </head>
 

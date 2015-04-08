@@ -72,12 +72,17 @@
     <Content Include="jasmine_favicon.png" />
     <Content Include="Jasmine_Test_Runner.html" />
     <Content Include="Scripts\boot.js" />
+    <Content Include="Scripts\fakeErrorHandler.js" />
     <Content Include="Scripts\jasmine-html.js" />
     <Content Include="Scripts\jasmine.js" />
     <Content Include="Scripts\sinon-1.9.1.js" />
-    <Content Include="specs\When_logging_simple_uncaught_error.js" />
+    <Content Include="specs\When_existing_window_onerror_exists.js" />
+    <Content Include="specs\When_logging_exception.js" />
+    <Content Include="specs\When_propagating_error.js" />
+    <Content Include="specs\When_logging_stack_trace.js" />
     <Content Include="specs\When_logging_messages.js" />
     <Content Include="specs\When_application_starts.js" />
+    <Content Include="specs\When_user_is_handling_error.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

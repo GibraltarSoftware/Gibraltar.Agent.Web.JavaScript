@@ -1,14 +1,17 @@
-﻿describe('When_logging_simple_uncaught_error', function () {
+﻿describe('When propagating error', function() {
 
     var xhr, requests;
 
+    beforeEach(function(done) {
 
-    beforeEach(function (done) {
         xhr = sinon.useFakeXMLHttpRequest();
         requests = [];
         xhr.onCreate = function(req) {
             requests.push(req);
         };
+
+        gibraltar.agent.propagateOnError = true;
+        spyOn(console, 'error');
         createSimpleError();
         requestComplete(done);
     });
@@ -17,14 +20,8 @@
         xhr.restore();
     });
 
-
-    it('Should POST request to correct url', function () {
-
-        var body = JSON.parse(requests[0].requestBody);
-
-        expect(requests[0].url).toBe(window.location.origin + '/Gibraltar/Log/Exception');
-        expect(requests[0].method).toBe('POST');
-        expect(body.Message).toBe("uncaught exception: Test Error");
+    it('Should propagate error outside of agent', function() {
+        expect(console.error).toHaveBeenCalled();
     });
 
 
@@ -41,7 +38,5 @@
         } else {
             setTimeout(requestComplete, 10, done);
         }
-        
     }
-
 });
