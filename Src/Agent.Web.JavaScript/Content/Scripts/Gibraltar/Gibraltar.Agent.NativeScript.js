@@ -115,7 +115,7 @@
 
     function createStackFromError(error) {
         // remove trailing new line
-        if (error.stack.substring(error.stack.length - 1) == "\n") {
+        if (error.stack.substring(error.stack.length - 1) === "\n") {
             error.stack = error.stack.substring(0, error.stack.length - 1);
         }
 
@@ -719,7 +719,7 @@
     }
 
 
-    /*!
+    /*
      * This is an altered version of Platform.js changed specifically to work
      * inside the agent so for example the assigning to global (window) has
      * been removed as well as immediate execution of the funtion
