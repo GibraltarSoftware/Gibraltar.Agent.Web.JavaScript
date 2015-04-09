@@ -63,15 +63,6 @@
     it('Should have trace for custom error details', function () {
 
         var expectedFrames;
-
-        switch (BrowserDetect.browser) {
-            case "Firefox":
-                expectedFrames = ["InnerItem/this.throwCustomError", "TestingStack/this.createError", "throwUninitializeError"];
-                break;
-            default:
-        }
-
-        var expectedFrames;
         var expectedMessage;
 
         switch (BrowserDetect.browser) {
@@ -140,7 +131,7 @@
     }
 
     function hasLoupeFrame(item) {
-        var loupeItems = ["printStackTrace", "getStackTrace", "logError"];
+        var loupeItems = ["createStackTrace", "getStackTrace", "logError"];
 
         return loupeItems.some(function (check) {
             return item.indexOf(check) > -1;
