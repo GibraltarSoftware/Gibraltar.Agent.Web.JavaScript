@@ -75,8 +75,10 @@
     <Content Include="Scripts\fakeErrorHandler.js" />
     <Content Include="Scripts\jasmine-html.js" />
     <Content Include="Scripts\jasmine.js" />
+    <Content Include="Scripts\platform.js" />
     <Content Include="Scripts\sinon-1.9.1.js" />
     <Content Include="specs\When_existing_window_onerror_exists.js" />
+    <Content Include="specs\When_logging_client_details.js" />
     <Content Include="specs\When_logging_exception.js" />
     <Content Include="specs\When_propagating_error.js" />
     <Content Include="specs\When_logging_stack_trace.js" />
@@ -114,7 +116,7 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PreBuildEvent>copy $(SolutionDir)\src\Agent.Web.JavaScript\Content\Scripts\Gibraltar\*.* $(ProjectDir)\Scripts\*.* /Y</PreBuildEvent>
+    <PreBuildEvent>copy $(SolutionDir)\src\Agent.Web.JavaScript\Content\Scripts\Gibraltar\Gibraltar*.js $(ProjectDir)\Scripts\*.* /Y</PreBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
