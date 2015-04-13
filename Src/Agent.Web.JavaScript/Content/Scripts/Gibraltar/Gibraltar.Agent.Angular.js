@@ -101,6 +101,7 @@
                 return stacktraceService.print({ e: exception, guess: true });
             } catch (e) {
                 // deliberately swallow; some browsers don't expose the stack property on the exception
+                console.log(e);
             }
             return null;
         }
@@ -205,8 +206,62 @@
         // stacktrace feature in a proper AngularJS service that formally exposes the print method.
 
         // "printStackTrace" is a global object from stacktrace.js
+
+
+
+
+        function createStackTrace(options) {
+            var stackTraceDetails = null;
+
+            stackTraceDetails = printStackTrace(options).reverse();
+
+            return stripLoupeStackFrames(stackTraceDetails);
+        }
+
+        function stripLoupeStackFrames(stack) {
+            // if we error is from a simple throw statement and not an error then
+            // stackTrace.js will have added methods from here so we need to remove
+            // them otherwise will be reported in Loupe
+            if (stack) {
+
+                var userFramesStartPosition = userFramesStartAt(stack);
+
+                if (userFramesStartPosition > 0) {
+                    // strip all loupe related frames from stack
+                    stack = stack.slice(userFramesStartPosition);
+                }
+            }
+
+            return stack;
+        }
+
+        function userFramesStartAt(stack) {
+            var loupeMethods = ["getStackTrace", "createStackTrace", "printStackTrace"];
+            var position = 0;
+
+            var methodPosition = 0;
+
+            for (var i = 0; i < stack.length; i++) {
+
+                // have we, or can we, find a loupe method in the stack
+                if (stack[i].indexOf(loupeMethods[methodPosition]) > -1) {
+                    methodPosition++;
+                   position = i;
+                }
+            }
+
+            // if we found the frames we were looking for the position will be at the last
+            // frame we found when in fact the user frames are the next frame on so we
+            // increment the position accordingly
+            if (position > 0) {
+                position++;
+            }
+
+            return position;
+        }
+
         return ({
-            print: printStackTrace
+            print: createStackTrace
         });
     })
     .factory("gibraltar.platformService", function () {

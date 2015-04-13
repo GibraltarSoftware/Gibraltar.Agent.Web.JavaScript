@@ -59,7 +59,23 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Angular_specs\When_an_exception_occurs.js" />
+    <Content Include="Angular_specs\When_logging_a_message.js" />
+    <Content Include="Angular_specs\When_logging_platform_details.js" />
+    <Content Include="Angular_specs\When_logging_stack_trace.js" />
+    <Content Include="Angular_specs\When_no_route_or_state_info_in_exception.js" />
+    <Content Include="Angular_specs\When_state_details_in_exception.js" />
+    <Content Include="app.js" />
+    <Content Include="Jasmine_Test_Runner_Angular_Agent.html" />
     <Content Include="packages.config" />
+    <Content Include="Scripts\angular-route.js" />
+    <Content Include="Scripts\angular-route.min.js" />
+    <Content Include="Scripts\angular-ui-router.js" />
+    <Content Include="Scripts\angular-ui-router.min.js" />
+    <Content Include="Scripts\angular.js" />
+    <Content Include="Scripts\angular.min.js" />
+    <Content Include="Scripts\angular.min.js.map" />
+    <Content Include="Scripts\angular-route.min.js.map" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -71,14 +87,18 @@
     <Content Include="jasmine.css" />
     <Content Include="jasmine_favicon.png" />
     <Content Include="Jasmine_Test_Runner.html" />
+    <Content Include="Scripts\angular-mocks.js" />
     <Content Include="Scripts\boot.js" />
     <Content Include="Scripts\fakeErrorHandler.js" />
     <Content Include="Scripts\jasmine-html.js" />
     <Content Include="Scripts\jasmine.js" />
     <Content Include="Scripts\platform.js" />
     <Content Include="Scripts\sinon-1.9.1.js" />
+    <Content Include="Scripts\stacktrace.js" />
+    <Content Include="Scripts\Utils.js" />
     <Content Include="specs\When_existing_window_onerror_exists.js" />
     <Content Include="specs\When_logging_client_details.js" />
+    <Content Include="Angular_specs\When_route_details_in_exception.js" />
     <Content Include="specs\When_logging_exception.js" />
     <Content Include="specs\When_propagating_error.js" />
     <Content Include="specs\When_logging_stack_trace.js" />
@@ -90,6 +110,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
