@@ -1,5 +1,5 @@
-﻿angular.module("Gibraltar.Agent.Angular", [])
-    .factory("gibraltar.logService", ["$log", "$window", "$injector", "gibraltar.stacktraceService", "gibraltar.platformService",
+﻿angular.module("Loupe.Agent.Angular", [])
+    .factory("loupe.logService", ["$log", "$window", "$injector", "loupe.stacktraceService", "loupe.platformService",
     function ($log, $window, $injector, stacktraceService, platformService) {
         // The error log service logs angular errors to the server
         // This is called from the existing Angular exception handler, as setup by a decorator
@@ -13,7 +13,7 @@
             verbose: 16,
         };
         var targets = {
-            base: "/Gibraltar/Log/",
+            base: "/Loupe/Log/",
             general: "Message",
             exception: "Exception"
         };
@@ -184,7 +184,7 @@
         }
         return (logService);
     }])
-    .factory("gibraltar.stacktraceService", ["$log", function ($log) {
+    .factory("loupe.stacktraceService", ["$log", function ($log) {
 
         try {
             var stackTrace = new StackTrace();
@@ -735,7 +735,7 @@
             return createStackTrace;
         }
     }])
-    .factory("gibraltar.platformService", function () {
+    .factory("loupe.platformService", function () {
 
 
         try {
@@ -1823,7 +1823,7 @@
     .config(["$provide", function ($provide) {
         // extend the error logging
         $provide.decorator("$exceptionHandler", [
-            "$delegate", "gibraltar.logService", function ($delegate, loupeLogService) {
+            "$delegate", "loupe.logService", function ($delegate, loupeLogService) {
                 return function (exception, cause) {
                     // Calls the original $exceptionHandler.
                     $delegate(exception, cause);

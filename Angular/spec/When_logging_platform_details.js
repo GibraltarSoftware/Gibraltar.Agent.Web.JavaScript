@@ -1,5 +1,5 @@
 ﻿describe('When logging platform details', function() {
-    var expectedUrl = '/Gibraltar/Log/Exception';
+    var expectedUrl = '/Loupe/Log/Exception';
     var $scope, ctrl, logService, clientDetails;
 
     beforeEach(function () {
@@ -8,7 +8,7 @@
         });
     });
 
-    beforeEach(inject(["gibraltar.logService", function (_logService_) {
+    beforeEach(inject(["loupe.logService", function (_logService_) {
         logService = _logService_;
     }]));
 

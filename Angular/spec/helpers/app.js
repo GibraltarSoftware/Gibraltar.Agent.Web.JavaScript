@@ -1,9 +1,9 @@
-﻿var app = angular.module('testApp', ["Gibraltar.Agent.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
+﻿var app = angular.module('testApp', ["Loupe.Agent.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
     $routeProvider.
         when('/', { controller: "TestCtrl" });
 }]);
 
-app.controller('TestCtrl', ["$scope", "$exceptionHandler", "gibraltar.logService", function ($scope, $exceptionHandler, logService) {
+app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", function ($scope, $exceptionHandler, logService) {
 
     this.throwSimpleError = function() {
         $exceptionHandler("Simple Error");
@@ -15,9 +15,9 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "gibraltar.logService
 }]);
 
 
-var stateApp = angular.module('stateApp', ["Gibraltar.Agent.Angular", "ui.router"]);
+var stateApp = angular.module('stateApp', ["Loupe.Agent.Angular", "ui.router"]);
 
-stateApp.controller('TestCtrl',["$scope", "$exceptionHandler", "gibraltar.logService", function ($scope, $exceptionHandler, logService) {
+stateApp.controller('TestCtrl',["$scope", "$exceptionHandler", "loupe.logService", function ($scope, $exceptionHandler, logService) {
 
     this.throwSimpleError = function() {
         $exceptionHandler("Simple Error");
@@ -28,12 +28,12 @@ stateApp.controller('TestCtrl',["$scope", "$exceptionHandler", "gibraltar.logSer
     }
 }]);
 
-var errorApp = angular.module('testErrorApp', ["Gibraltar.Agent.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
+var errorApp = angular.module('testErrorApp', ["Loupe.Agent.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
     $routeProvider.
         when('/', { controller: "TestCtrl" });
 }]);
 
-errorApp.controller('TestCtrl', ["$scope", "$exceptionHandler", "gibraltar.logService", function ($scope, $exceptionHandler, logService) {
+errorApp.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", function ($scope, $exceptionHandler, logService) {
 
     this.throwSimpleError = function () {
 

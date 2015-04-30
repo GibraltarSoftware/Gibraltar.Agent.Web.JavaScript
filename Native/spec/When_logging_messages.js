@@ -19,12 +19,12 @@
 
 
     it('Should make request to correct url', function() {
-        expect(requests[0].url).toBe(window.location.origin + '/Gibraltar/Log/Message');
+        expect(requests[0].url).toBe(window.location.origin + '/Loupe/Log/Message');
     });
 
     it('Should post request', function() {
         expect(requests[0].method).toBe('POST');
-        expect(requests[0].url).toBe(window.location.origin + '/Gibraltar/Log/Message');
+        expect(requests[0].url).toBe(window.location.origin + '/Loupe/Log/Message');
     });
 
 
@@ -32,11 +32,11 @@
 
         var body = JSON.parse(requests[0].requestBody);
 
-        expect(body.Severity).toBe(gibraltar.logMessageSeverity.information);
+        expect(body.Severity).toBe(loupe.logMessageSeverity.information);
     });
 
     function log() {
-        gibraltar.agent.log(gibraltar.logMessageSeverity.information, 'test', 'test logs message');
+        loupe.agent.log(loupe.logMessageSeverity.information, 'test', 'test logs message');
     }
 
     function requestComplete(done) {

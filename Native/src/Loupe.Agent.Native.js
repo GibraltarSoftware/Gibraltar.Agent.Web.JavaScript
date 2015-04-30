@@ -1,4 +1,4 @@
-﻿(function (gibraltar, window) {
+﻿(function (loupe, window) {
 
     var existingOnError = window.onerror;
     var stackTrace;
@@ -6,12 +6,12 @@
     var propagateError = false;
 
     var targets = {
-        base: "/Gibraltar/Log/",
+        base: "/Loupe/Log/",
         general: "Message",
         exception: "Exception"
     };
 
-    gibraltar.logMessageSeverity = {
+    loupe.logMessageSeverity = {
         none: 0,
         critical: 1,
         error: 2,
@@ -24,12 +24,12 @@
 
     setUpOnError(window);
 
-    gibraltar.agent = {
+    loupe.agent = {
         log: log,
         propagateOnError: propagateError
     };
 
-    return gibraltar.agent;
+    return loupe.agent;
 
 
     function log(severity, category, caption, description, parameters, details) {
@@ -77,7 +77,7 @@
             // us to return false but logically we want to state we
             // want to propagate i.e. true, so we reverse the bool
             // so users can set as they expect not how browser expects
-            return !gibraltar.agent.propagateOnError;
+            return !loupe.agent.propagateOnError;
         };
 
     }
@@ -1777,5 +1777,5 @@
         
     }
 
-})(window.gibraltar = window.gibraltar || {}, window);
+})(window.loupe = window.loupe || {}, window);
 

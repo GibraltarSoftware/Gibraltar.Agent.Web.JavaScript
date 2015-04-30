@@ -1,12 +1,12 @@
 ﻿describe('When logging a message', function() {
-    var expectedUrl = '/Gibraltar/Log/Message';
+    var expectedUrl = '/Loupe/Log/Message';
     var $scope, ctrl, logService;
 
     beforeEach(module('testApp', function ($exceptionHandlerProvider) {
         $exceptionHandlerProvider.mode('log');
     }));
 
-    beforeEach(inject(["gibraltar.logService", function (_logService_) {
+    beforeEach(inject(["loupe.logService", function (_logService_) {
         logService = _logService_;
     }]));
 

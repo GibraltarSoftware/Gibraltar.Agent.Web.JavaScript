@@ -24,7 +24,7 @@
     });
 
     it('Should send to expected URL', function() {
-        expect(requests[0].url).toBe(window.location.origin + '/Gibraltar/Log/Exception');
+        expect(requests[0].url).toBe(window.location.origin + '/Loupe/Log/Exception');
     });
 
     it('Should POST to server', function() {
