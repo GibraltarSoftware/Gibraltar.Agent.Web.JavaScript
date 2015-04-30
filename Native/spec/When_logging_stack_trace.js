@@ -52,9 +52,9 @@
                 break;
         }
 
-        expect(body.Message).toBe(expectedMessage);
-        expect(body.StackTrace).not.toBeUndefined();
-        expect(hasExpectedStack(body.StackTrace, expectedFrames)).toBe(true);
+        expect(body.logMessages[0].exception.message).toBe(expectedMessage);
+        expect(body.logMessages[0].exception.stackTrace).not.toBeUndefined();
+        expect(hasExpectedStack(body.logMessages[0].exception.stackTrace, expectedFrames)).toBe(true);
 
 
     });
@@ -88,9 +88,9 @@
 
         body = JSON.parse(request.requestBody);
 
-        expect(body.Message).toBe(expectedMessage);
-        expect(body.StackTrace).not.toBeUndefined();
-        expect(hasExpectedStack(body.StackTrace, expectedFrames)).toBe(true);
+        expect(body.logMessages[0].exception.message).toBe(expectedMessage);
+        expect(body.logMessages[0].exception.stackTrace).not.toBeUndefined();
+        expect(hasExpectedStack(body.logMessages[0].exception.stackTrace, expectedFrames)).toBe(true);
     });
 
     it('Should have trace anonymous error', function() {
@@ -115,9 +115,9 @@
 
         body = JSON.parse(request.requestBody);
 
-        expect(body.Message).toBe(expectedMessage);
-        expect(hasExpectedStack(body.StackTrace, expectedFrames)).toBe(true);
-        expect(body.StackTrace.some(hasLoupeFrame)).toBe(false);
+        expect(body.logMessages[0].exception.message).toBe(expectedMessage);
+        expect(hasExpectedStack(body.logMessages[0].exception.stackTrace, expectedFrames)).toBe(true);
+        expect(body.logMessages[0].exception.stackTrace.some(hasLoupeFrame)).toBe(false);
     });
 
     function throwUninitializeError() {

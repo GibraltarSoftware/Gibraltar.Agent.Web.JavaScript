@@ -158,33 +158,58 @@
     function logError(msg, url, line, column, error) {
         var target = targetUrl();
 
-        var errorDetails = {
-            Category: "JavaScript",
-            Message: msg,
-            Url: url,
-            StackTrace: getStackTrace(error, msg),
-            Cause: "",
-            Line: line,
-            Column: column,
-            Details: ""
+        var message = {
+          severity: loupe.logMessageSeverity.error,
+          category: "JavaScript",
+          caption: '',
+          description: '',
+          parameters: [],
+          details: null,
+          exception: {
+            message: msg,
+            url: url,
+            stackTrace: getStackTrace(error, msg),
+            cause: "",
+            line: line,
+            column: column,              
+          },
+          methodSourceInfo: null,
+          timeStamp: null,
+          sequence: null
         };
 
-        errorDetails.Details = JSON.stringify({ Client: getPlatform() });
+        var logMessage = {
+            session: {
+               client: getPlatform()
+            },
+            logMessages: [message]
+        };
 
-        return sendLog(target, errorDetails);
+        return sendLog(target, logMessage);
     }
 
     function logMessage(severity, category, caption, description, parameters, details, target) {
-        var logDetails = {
-            Severity: severity,
-            Category: category,
-            Caption: caption,
-            Description: description,
-            Parameters: parameters,
-            Details: JSON.stringify(details)
+        var message = {
+          severity: severity,
+          category: category,
+          caption: caption,
+          description: description,
+          parameters: parameters,
+          details: details,
+          exception: null,
+          methodSourceInfo: null,
+          timeStamp: null,
+          sequence: null
         };
 
-        sendLog(target, logDetails);
+        var logMessage = {
+            session: {
+               client: getPlatform()
+            },
+            logMessages: [message]
+        };
+
+        sendLog(target, logMessage);
     }
 
     function targetUrl() {
@@ -194,7 +219,7 @@
     function sendLog(target, errorDetails) {
         try {
             if (typeof (XMLHttpRequest) === "undefined") {
-                console.log("Gibraltar Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
+                console.log("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
                 return false;
             }
 
@@ -215,7 +240,7 @@
             xhr.send(JSON.stringify(errorDetails));
 
         } catch (e) {
-            consoleLog("Gibraltar Loupe JavaScript Logger: Exception while attempting to log to " + target);
+            consoleLog("Loupe JavaScript Logger: Exception while attempting to log to " + target);
             console.dir(e);
             return false;
         }

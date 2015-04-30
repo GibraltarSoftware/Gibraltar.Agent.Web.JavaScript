@@ -32,7 +32,7 @@
 
         var body = JSON.parse(requests[0].requestBody);
 
-        expect(body.Severity).toBe(loupe.logMessageSeverity.information);
+        expect(body.logMessages[0].severity).toBe(loupe.logMessageSeverity.information);
     });
 
     function log() {

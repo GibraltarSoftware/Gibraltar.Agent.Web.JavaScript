@@ -64,7 +64,7 @@
 
     function getClientDetails() {
         var body = JSON.parse(requests[0].requestBody);
-        return JSON.parse(body.Details).Client;
+        return body.session.client;
     }
 
     function createError() {

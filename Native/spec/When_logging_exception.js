@@ -34,7 +34,7 @@
     it('Should have expected message', function() {
 		console.log(BrowserDetect.browser);
         var body = JSON.parse(requests[0].requestBody);
-        expect(body.Message).toMatch(/Test Error/);
+        expect(body.logMessages[0].exception.message).toMatch(/Test Error/);
     });
 
     function createError() {
