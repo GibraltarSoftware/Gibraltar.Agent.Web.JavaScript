@@ -5,12 +5,6 @@
     var clientPlatform;
     var propagateError = false;
 
-    var targets = {
-        base: "/Loupe/Log/",
-        general: "Message",
-        exception: "Exception"
-    };
-
     loupe.logMessageSeverity = {
         none: 0,
         critical: 1,
@@ -34,7 +28,7 @@
 
     function log(severity, category, caption, description, parameters, details) {
 
-        var target = targetUrl(targets.general);
+        var target = targetUrl();
 
         setTimeout(logMessage, 10, severity, category, caption, description, parameters, details, target);
     }
@@ -162,7 +156,7 @@
     }
 
     function logError(msg, url, line, column, error) {
-        var target = targetUrl(targets.exception);
+        var target = targetUrl();
 
         var errorDetails = {
             Category: "JavaScript",
@@ -193,8 +187,8 @@
         sendLog(target, logDetails);
     }
 
-    function targetUrl(endpoint) {
-        return window.location.origin + targets.base + endpoint;
+    function targetUrl() {
+        return window.location.origin + '/loupe/log';
     }
 
     function sendLog(target, errorDetails) {

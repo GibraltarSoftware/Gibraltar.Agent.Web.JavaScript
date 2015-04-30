@@ -19,12 +19,12 @@
 
 
     it('Should make request to correct url', function() {
-        expect(requests[0].url).toBe(window.location.origin + '/Loupe/Log/Message');
+        expect(requests[0].url).toBe(window.location.origin + '/loupe/log');
     });
 
     it('Should post request', function() {
         expect(requests[0].method).toBe('POST');
-        expect(requests[0].url).toBe(window.location.origin + '/Loupe/Log/Message');
+        expect(requests[0].url).toBe(window.location.origin + '/loupe/log');
     });
 
 
