@@ -109,3 +109,9 @@ UpgradeLog*.XML
 
 #node modules
 node_modules
+
+#grunt folder
+.grunt
+
+#jasmine spec runner
+_SpecRunner.html
