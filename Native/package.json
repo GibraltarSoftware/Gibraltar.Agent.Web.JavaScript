@@ -1,0 +1,36 @@
+{
+  "name": "Loupe.Agent.JavaScript.Native",
+  "version": "1.0.0",
+  "description": "Loupe agent for Javascript",
+  "main": "Loupe.Agent.Native.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript"
+  },
+  "keywords": [
+    "Loupe",
+    "Logging"
+  ],
+  "author": "Gibraltar Software Inc.",
+  "licenses": [
+    {
+      "type": "Apache License 2.0",
+      "url": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/blob/master/LICENSE.txt"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/issues"
+  },
+  "homepage": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-connect": "^0.10.1",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-jasmine": "^0.8.2",
+    "grunt-contrib-jshint": "^0.11.2",
+    "grunt-contrib-uglify": "^0.9.1",
+    "grunt-template-jasmine-istanbul": "^0.3.3",
+    "sinon": "^1.14.1"
+  }
+}

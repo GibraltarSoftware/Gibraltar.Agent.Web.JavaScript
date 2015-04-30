@@ -1,5 +1,0 @@
-## we ignore the files that we copy from the actual project
-## as they aren't required separetly in the Tests project
-stacktrace.js
-Gibraltar.Agent.Angular.js
-Gibraltar.Agent.NativeScript.js
