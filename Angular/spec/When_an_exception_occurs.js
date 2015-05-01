@@ -103,4 +103,15 @@
         $httpBackend.flush();
     }));
 
+    it('Should have sequence number', inject(function ($httpBackend) {
+        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
+            var data = JSON.parse(requestBody);
+
+            expect(data.logMessages[0].sequence).not.toBeNull();
+            return true;
+        }).respond(200);
+
+        ctrl.throwSimpleError();
+        $httpBackend.flush();
+    }));
 });

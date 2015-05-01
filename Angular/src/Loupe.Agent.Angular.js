@@ -3,6 +3,8 @@
     function ($log, $window, $injector, stacktraceService, platformService) {
         // The error log service logs angular errors to the server
         // This is called from the existing Angular exception handler, as setup by a decorator
+        
+        var sequenceNumber = 0;
 
         var logMessageSeverity = {
             none: 0,
@@ -170,6 +172,8 @@
         }
 
         function createMessage(severity, category, caption, description, parameters, details, exception, methodSourceInfo){
+            sequenceNumber++;
+            
             var message = {
               severity: severity,
               category: category,
@@ -180,7 +184,7 @@
               exception: exception,
               methodSourceInfo: null,
               timeStamp: createTimeStamp(),
-              sequence: null
+              sequence: sequenceNumber
             };
             
             return message;        

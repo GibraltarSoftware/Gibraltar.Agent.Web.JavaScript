@@ -4,6 +4,7 @@
     var stackTrace;
     var clientPlatform;
     var propagateError = false;
+    var sequenceNumber = 0;
 
     loupe.logMessageSeverity = {
         none: 0,
@@ -172,6 +173,7 @@
     }
 
     function createMessage(severity, category, caption, description, parameters, details, exception, methodSourceInfo){
+        sequenceNumber++;
         var message = {
           severity: severity,
           category: category,
@@ -182,7 +184,7 @@
           exception: exception,
           methodSourceInfo: null,
           timeStamp: createTimeStamp(),
-          sequence: null
+          sequence: sequenceNumber
         };
         
         return message;        

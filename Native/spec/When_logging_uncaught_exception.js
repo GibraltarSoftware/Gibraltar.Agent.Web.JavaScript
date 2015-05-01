@@ -60,9 +60,15 @@
         var partialTimeStamp = createTimeStamp();
         
         var body = JSON.parse(requests[0].requestBody);
-        console.info(body.logMessages[0].timeStamp);
+
         expect(body.logMessages[0].timeStamp).toContain(partialTimeStamp);
     });
+    
+    it('Should have sequence number', function(){
+        var body = JSON.parse(requests[0].requestBody); 
+        expect(body.logMessages[0].sequence).not.toBeNull();
+    });
+
 
     function createError() {
         setTimeout(function () {
