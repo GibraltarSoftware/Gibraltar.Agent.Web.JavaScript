@@ -5,7 +5,8 @@
         // This is called from the existing Angular exception handler, as setup by a decorator
         
         var sequenceNumber = 0;
-
+        var sessionId;
+        
         var logMessageSeverity = {
             none: 0,
             critical: 1,
@@ -111,6 +112,10 @@
                 logMessages: [message]
             };              
             
+            if(sessionId){
+                logMessage.session.sessionId = sessionId;
+            }
+            
             sendMessage(logMessage);
         }
 
@@ -215,11 +220,15 @@
             logMessageToServer(message);
         }
 
+        function setSessionId(value){
+            sessionId = value;
+        }
 
         var logService = {
             exception: logException,
             log: logMessage,
-            logMessageSeverity: logMessageSeverity
+            logMessageSeverity: logMessageSeverity,
+            setSessionId: setSessionId
         }
         return (logService);
     }])

@@ -1,7 +1,8 @@
 ﻿describe('When logging uncaught exception', function() {
 
     var xhr, requests;
-
+    var sessionId = "session-456-def";
+    
 	beforeAll(function() {
         BrowserDetect.init();
     });
@@ -14,6 +15,7 @@
             requests.push(req);
         };
 
+        loupe.agent.setSessionId(sessionId);
         createError();
         requestsComplete(done);
 
@@ -69,6 +71,10 @@
         expect(body.logMessages[0].sequence).not.toBeNull();
     });
 
+    it('Should have client assigned session id', function(){
+        var body = JSON.parse(requests[0].requestBody); 
+        expect(body.session.sessionId).toEqual(sessionId);        
+    })
 
     function createError() {
         setTimeout(function () {

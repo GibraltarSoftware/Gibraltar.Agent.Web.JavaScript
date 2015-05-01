@@ -1,8 +1,8 @@
 ﻿describe('When an exception occurs', function() {
 
     var expectedUrl = '/Loupe/Log';
-
     var $scope, ctrl, logService;
+    var sessionId = 'angular-session-def-456';
 
     beforeEach(function() {
 
@@ -114,4 +114,18 @@
         ctrl.throwSimpleError();
         $httpBackend.flush();
     }));
+    
+    it('Should have session Id set', inject(function ($httpBackend) {
+        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
+            var data = JSON.parse(requestBody);
+
+            expect(data.session.sessionId).toEqual(sessionId);
+            return true;
+        }).respond(200);
+
+        logService.setSessionId(sessionId);
+        ctrl.throwSimpleError();
+        $httpBackend.flush();
+    }));    
+    
 });

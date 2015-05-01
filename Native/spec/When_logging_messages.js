@@ -1,7 +1,7 @@
 ﻿describe('When_logging_messages', function () {
 
     var xhr, requests;
-
+    var sessionId = "session-123-abc";
 
     beforeEach(function (done) {
         xhr = sinon.useFakeXMLHttpRequest();
@@ -9,6 +9,7 @@
         xhr.onCreate = function(req) {
             requests.push(req);
         };
+        loupe.agent.setSessionId(sessionId);
         log();
         requestComplete(done);
     });
@@ -61,6 +62,11 @@
         var body = JSON.parse(requests[0].requestBody); 
         expect(body.logMessages[0].sequence).not.toBeNull();
     });
+
+    it('Should have client assigned session id', function(){
+        var body = JSON.parse(requests[0].requestBody); 
+        expect(body.session.sessionId).toEqual(sessionId);        
+    })
 
     function log() {
         loupe.agent.log(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'], 'with details');

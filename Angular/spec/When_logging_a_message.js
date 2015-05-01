@@ -1,6 +1,7 @@
 ﻿describe('When logging a message', function() {
     var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService;
+    var sessionId = "angular-session-abc-123";
 
     beforeEach(module('testApp', function ($exceptionHandlerProvider) {
         $exceptionHandlerProvider.mode('log');
@@ -112,5 +113,18 @@
         $scope.logMessage("Test expected message");
         $httpBackend.flush();
     }));
+
+    it('Should have session Id assigned to it', inject(function ($httpBackend) {
+        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
+            var data = JSON.parse(requestBody);
+
+            expect(data.session.sessionId).toEqual(sessionId);
+            return true;
+        }).respond(200);
+
+        logService.setSessionId(sessionId);
+        $scope.logMessage("Test expected message");
+        $httpBackend.flush();
+    }));    
 
 });

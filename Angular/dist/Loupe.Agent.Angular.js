@@ -3,7 +3,10 @@
     function ($log, $window, $injector, stacktraceService, platformService) {
         // The error log service logs angular errors to the server
         // This is called from the existing Angular exception handler, as setup by a decorator
-
+        
+        var sequenceNumber = 0;
+        var sessionId;
+        
         var logMessageSeverity = {
             none: 0,
             critical: 1,
@@ -100,16 +103,31 @@
             return null;
         }
 
-        function logMessageToServer(errorDetails) {
+        function logMessageToServer(message) {
+            
+            var logMessage = {
+                session: {
+                   client: platformService.platform()
+                },
+                logMessages: [message]
+            };              
+            
+            if(sessionId){
+                logMessage.session.sessionId = sessionId;
+            }
+            
+            sendMessage(logMessage);
+        }
+
+        function sendMessage(logMessage){
             var http = $injector.get("$http");
-            http.post("/Loupe/Log", angular.toJson(errorDetails))
+            http.post("/Loupe/Log", angular.toJson(logMessage))
                 .error(function logMessageError(data, status, headers, config) {
                     $log.warn("Loupe Angular Logger: Exception while attempting to log");
                     $log.log("  status: " + status);
                     $log.log("  data: " + data);
-                });
+                });            
         }
-
 
         // Log the given error to the remote server.
         function logException(exception, cause) {
@@ -123,56 +141,33 @@
                 var stackTrace = getStackTrace(exception);
                 
                 // Log the angular error to the server.
-                var data = {
-                    Message: errorMessage,
-                    Url: $window.location.href,
-                    StackTrace: stackTrace,
-                    Cause: (cause || "")
-                };
-                if (routeState) {
-                    data.Controller = routeState.controller;
+//                if (routeState) {
+//                    data.Controller = routeState.controller;
+//
+//                    var details = {
+//                        Page: {
+//                            RouteName: routeState.name,
+//                            RouteUrl: routeState.url,
+//                            Controller: routeState.controller,
+//                            TemplateUrl: routeState.templateUrl,
+//                            Parameters: routeState.parameters
+//                        }
+//                    };
+//                    data.Details = JSON.stringify(details);
+//                };
 
-                    var details = {
-                        Page: {
-                            RouteName: routeState.name,
-                            RouteUrl: routeState.url,
-                            Controller: routeState.controller,
-                            TemplateUrl: routeState.templateUrl,
-                            Parameters: routeState.parameters
-                        },
-                        Client: platformService.platform()
-                    };
-                    data.Details = JSON.stringify(details);
+                var loupeException = {
+                    message: errorMessage,
+                    url: $window.location.href,
+                    stackTrace: stackTrace,
+                    cause: cause || "",
+                    line: null,
+                    column: null,                        
                 };
 
-                var logDetails = {
-                    severity: logMessageSeverity.error,
-                    category: "JavaScript",
-                    caption: "",
-                    description: "",
-                    parameters: "",
-                    details: null,
-                    exception: {
-                        message: errorMessage,
-                        url: $window.location.href,
-                        stackTrace: stackTrace,
-                        cause: "",
-                        line: null,
-                        column: null,              
-                    },
-                    methodSourceInfo: null,
-                    timeStamp: null,
-                    sequence: null
-                };
-    
-                var logMessage = {
-                    session: {
-                       client: platformService.platform()
-                    },
-                    logMessages: [logDetails]
-                };            
-        
-                logMessageToServer(logMessage);
+                var message = createMessage(logMessageSeverity.error,"JavaScript","","",null,null,loupeException,null);
+
+                logMessageToServer(message);
 
             } catch (loggingError) {
                 // For developers - log the log-failure.
@@ -181,36 +176,59 @@
             }
         }
 
-        function logMessage(severity, category, caption, description, parameters, details) {
-
-            var logDetails = {
-                severity: severity,
-                category: category,
-                caption: caption,
-                description: description,
-                parameters: parameters,
-                details: JSON.stringify(details),
-                exception: null,
-                methodSourceInfo: null,
-                timeStamp: null,
-                sequence: null
+        function createMessage(severity, category, caption, description, parameters, details, exception, methodSourceInfo){
+            sequenceNumber++;
+            
+            var message = {
+              severity: severity,
+              category: category,
+              caption: caption,
+              description: description,
+              parameters: parameters,
+              details: details,
+              exception: exception,
+              methodSourceInfo: null,
+              timeStamp: createTimeStamp(),
+              sequence: sequenceNumber
             };
+            
+            return message;        
+        }
 
-            var logMessage = {
-                session: {
-                   client: platformService.platform()
-                },
-                logMessages: [logDetails]
-            };            
-    
-                logMessageToServer(logMessage);
-            }
+        function createTimeStamp() {
+            var now = new Date(),
+                tzo = -now.getTimezoneOffset(),
+                dif = tzo >= 0 ? '+' : '-',
+                pad = function(num) {
+                    var norm = Math.abs(Math.floor(num));
+                    return (norm < 10 ? '0' : '') + norm;
+                };
+            return now.getFullYear() 
+                + '-' + pad(now.getMonth()+1)
+                + '-' + pad(now.getDate())
+                + 'T' + pad(now.getHours())
+                + ':' + pad(now.getMinutes()) 
+                + ':' + pad(now.getSeconds()) 
+                + dif + pad(tzo / 60) 
+                + ':' + pad(tzo % 60);
+        }    
 
+        function logMessage(severity, category, caption, description, parameters, details) {
+            
+            var message = createMessage(severity,category, caption, description, parameters, details, null,null);
+        
+            logMessageToServer(message);
+        }
+
+        function setSessionId(value){
+            sessionId = value;
+        }
 
         var logService = {
             exception: logException,
             log: logMessage,
-            logMessageSeverity: logMessageSeverity
+            logMessageSeverity: logMessageSeverity,
+            setSessionId: setSessionId
         }
         return (logService);
     }])

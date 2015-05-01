@@ -9,6 +9,10 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
         $exceptionHandler("Simple Error");
     }
 
+    $scope.setSessionId = function(value){
+        logService.setSessionId = value;
+    }
+
     $scope.logMessage = function(logText) {
         logService.log(logService.logMessageSeverity.information, 'test', logText,"log description",["parameter"],"details");
     }
@@ -21,6 +25,10 @@ stateApp.controller('TestCtrl',["$scope", "$exceptionHandler", "loupe.logService
 
     this.throwSimpleError = function() {
         $exceptionHandler("Simple Error");
+    }
+
+    $scope.setSessionId = function(value){
+        logService.setSessionId = value;
     }
 
     $scope.logMessage = function(logText) {
@@ -61,6 +69,10 @@ errorApp.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logServic
         } catch (e) {
             $exceptionHandler(e);
         } 
+    }
+
+    $scope.setSessionId = function(value){
+        logService.setSessionId = value;
     }
 
     $scope.logMessage = function (logText) {

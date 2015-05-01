@@ -5,7 +5,8 @@
     var clientPlatform;
     var propagateError = false;
     var sequenceNumber = 0;
-
+    var sessionId;
+    
     loupe.logMessageSeverity = {
         none: 0,
         critical: 1,
@@ -21,10 +22,15 @@
 
     loupe.agent = {
         log: log,
+        setSessionId: setSessionId,
         propagateOnError: propagateError
     };
 
     return loupe.agent;
+
+    function setSessionId(value){
+        sessionId = value;
+    }
 
 
     function log(severity, category, caption, description, parameters, details) {
@@ -215,6 +221,10 @@
             },
             logMessages: [message]
         };
+         
+         if(sessionId){
+             logMessage.session.sessionId = sessionId;
+         }
          
         sendMessage(logMessage);
         
