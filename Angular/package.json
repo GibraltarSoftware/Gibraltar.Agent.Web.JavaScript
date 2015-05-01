@@ -11,12 +11,12 @@
     "Loupe",
     "Logging"
   ],
-  "author":"Gibraltar Software Inc.",
+  "author": "Gibraltar Software Inc.",
   "licenses": [
-		{
-			"type": "Apache License 2.0",
-			"url": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/blob/master/LICENSE.txt"
-		}
+    {
+      "type": "Apache License 2.0",
+      "url": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/blob/master/LICENSE.txt"
+    }
   ],
   "bugs": {
     "url": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/issues"
@@ -30,7 +30,8 @@
     "grunt-contrib-jasmine": "^0.8.2",
     "grunt-contrib-jshint": "^0.11.2",
     "grunt-contrib-uglify": "^0.9.1",
+    "grunt-contrib-watch": "^0.6.1",
     "grunt-template-jasmine-istanbul": "^0.3.3",
     "sinon": "^1.14.1"
-  }  
+  }
 }

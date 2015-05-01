@@ -1,5 +1,5 @@
-﻿describe('When state details in exception', function() {
-    var expectedUrl = '/Loupe/Log/Exception';
+﻿xdescribe('When state details in exception', function() {
+    var expectedUrl = '/Loupe/Log';
 
     var $scope, ctrl, logService;
 

@@ -1,5 +1,5 @@
 ﻿describe("When logging stack trace", function() {
-    var expectedUrl = '/Loupe/Log/Exception';
+    var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService, clientDetails;
 
     beforeAll(function () {
@@ -26,7 +26,7 @@
             logService: logService
         });
     }));
-
+ 
     afterEach(inject(function ($httpBackend) {
         $httpBackend.verifyNoOutstandingExpectation();
         $httpBackend.verifyNoOutstandingRequest();

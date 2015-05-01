@@ -35,8 +35,22 @@
         expect(body.logMessages[0].severity).toBe(loupe.logMessageSeverity.information);
     });
 
+    it('Should have expected message structure', function(){
+       var body = JSON.parse(requests[0].requestBody);
+        expect(body['session']).toBeDefined();
+        expect(body['logMessages']).toBeDefined();
+        
+        expect(body.session['client']).toBeDefined();
+        
+        checkClientMessageStructure(body.session.client);
+        
+        expect(body.logMessages[0]).toBeDefined();
+        checkMessageStructure(body.logMessages[0]);
+        
+    });
+
     function log() {
-        loupe.agent.log(loupe.logMessageSeverity.information, 'test', 'test logs message');
+        loupe.agent.log(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'], 'with details');
     }
 
     function requestComplete(done) {

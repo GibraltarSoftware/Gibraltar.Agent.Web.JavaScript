@@ -90,3 +90,37 @@ function InnerItem() {
         throw "Throw with message";
     };
 }
+
+function checkClientMessageStructure(client){
+    expect(client['description']).toBeDefined('client description missing');
+    expect(client['layout']).toBeDefined('client layout missing');
+    expect(client['manufacturer']).toBeDefined('client manufacturer missing');
+    expect(client['name']).toBeDefined('client name missing');
+    expect(client['prerelease']).toBeDefined('client prerelease missing');
+    expect(client['product']).toBeDefined('client product missing');
+    expect(client['ua']).toBeDefined('client ua missing');
+    expect(client['version']).toBeDefined('client version missing');
+    expect(client['os']).toBeDefined('client os missing');
+
+    var clientOS = client.os;
+    expect(clientOS['architecture']).toBeDefined('client os architecture missing');
+    expect(clientOS['family']).toBeDefined('client os family missing');
+    expect(clientOS['version']).toBeDefined('client os version missing');
+    
+    var clientSize = client.size;
+    expect(clientSize['width']).toBeDefined('client size width missing');
+    expect(clientSize['height']).toBeDefined('client size height missing');          
+}
+
+function checkMessageStructure(message){
+    expect(message['severity']).toBeDefined('severity missing');
+    expect(message['category']).toBeDefined('category missing');
+    expect(message['caption']).toBeDefined('caption missing');
+    expect(message['description']).toBeDefined('description missing');
+    expect(message['parameters']).toBeDefined('parameters missing');
+    expect(message['details']).toBeDefined('details missing');
+    expect(message['exception']).toBeDefined('exception missing');
+    expect(message['methodSourceInfo']).toBeDefined('methodSourceInfo missing');
+    expect(message['timeStamp']).toBeDefined('timeStamp missing');
+    expect(message['sequence']).toBeDefined('sequence missing');        
+}

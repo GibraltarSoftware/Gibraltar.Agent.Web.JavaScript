@@ -64,6 +64,12 @@ module.exports = function(grunt){
 					outputTrace: false
 				}
 			}			
+		},
+		watch: {
+			scripts: {
+				files: ['src/Loupe.Agent.Native.js', 'spec/*.js'],
+				tasks: 'test'
+			}
 		}		
 	});
 
@@ -73,6 +79,7 @@ module.exports = function(grunt){
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-connect');
 	grunt.loadNpmTasks('grunt-contrib-jasmine');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('test',['clean:test','copy:test', 'connect','jasmine:unit']);
 	grunt.registerTask('default',['clean:build','copy:main', 'uglify', 'connect', 'jasmine:build']);

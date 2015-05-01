@@ -10,7 +10,7 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
     }
 
     $scope.logMessage = function(logText) {
-        logService.log(logService.logMessageSeverity.information, 'test', logText);
+        logService.log(logService.logMessageSeverity.information, 'test', logText,"log description",["parameter"],"details");
     }
 }]);
 

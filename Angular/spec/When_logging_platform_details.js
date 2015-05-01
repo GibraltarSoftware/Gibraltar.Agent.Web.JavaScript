@@ -1,5 +1,5 @@
 ﻿describe('When logging platform details', function() {
-    var expectedUrl = '/Loupe/Log/Exception';
+    var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService, clientDetails;
 
     beforeEach(function () {
@@ -26,7 +26,7 @@
     beforeEach(inject(function($httpBackend) {
         $httpBackend.expectPOST(expectedUrl, function(requestBody) {
             var data = JSON.parse(requestBody);
-            clientDetails = JSON.parse(data.Details).Client;
+            clientDetails = data.session.client;
             return true;
         }).respond(200);
         ctrl.throwSimpleError();
@@ -40,10 +40,9 @@
 
 
     it('Should have size information', function() {
-
         var expectedWidth = window.innerWidth || document.body.clientWidth;
         var expectedHeight = window.innerHeight || document.body.clientHeight;
-
+        
         expect(clientDetails.size).not.toBeUndefined();
         expect(clientDetails.size.width).toEqual(expectedWidth);
         expect(clientDetails.size.height).toEqual(expectedHeight);

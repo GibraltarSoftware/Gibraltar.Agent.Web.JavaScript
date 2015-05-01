@@ -1,5 +1,5 @@
-﻿angular.module("Gibraltar.Agent.Angular", [])
-    .factory("gibraltar.logService", ["$log", "$window", "$injector", "gibraltar.stacktraceService", "gibraltar.platformService",
+﻿angular.module("Loupe.Agent.Angular", [])
+    .factory("loupe.logService", ["$log", "$window", "$injector", "loupe.stacktraceService", "loupe.platformService",
     function ($log, $window, $injector, stacktraceService, platformService) {
         // The error log service logs angular errors to the server
         // This is called from the existing Angular exception handler, as setup by a decorator
@@ -12,15 +12,6 @@
             information: 8,
             verbose: 16,
         };
-        var targets = {
-            base: "/Gibraltar/Log/",
-            general: "Message",
-            exception: "Exception"
-        };
-
-        function targetUrl(endpoint) {
-            return targets.base + endpoint;
-        }
 
         function getRoute() {
             // get the data from standard angular route provider
@@ -47,6 +38,7 @@
                 return null;
             }
         }
+        
         function getState() {
             // get the data from the ui-router state provider
             var state;
@@ -68,6 +60,7 @@
                 return null;
             }
         }
+        
         function getLocation() {
             var location = $injector.get("$location");
             return {
@@ -78,6 +71,7 @@
                 parameters: []
             }
         }
+        
         function getRouteState() {
 
             var route = getRoute();
@@ -106,11 +100,11 @@
             return null;
         }
 
-        function logMessageToServer(target, errorDetails) {
+        function logMessageToServer(errorDetails) {
             var http = $injector.get("$http");
-            http.post(target, angular.toJson(errorDetails))
+            http.post("/Loupe/Log", angular.toJson(errorDetails))
                 .error(function logMessageError(data, status, headers, config) {
-                    $log.warn("Loupe Angular Logger: Exception while attempting to log to " + target);
+                    $log.warn("Loupe Angular Logger: Exception while attempting to log");
                     $log.log("  status: " + status);
                     $log.log("  data: " + data);
                 });
@@ -127,7 +121,7 @@
                 var routeState = getRouteState();
                 var errorMessage = exception.toString();
                 var stackTrace = getStackTrace(exception);
-
+                
                 // Log the angular error to the server.
                 var data = {
                     Message: errorMessage,
@@ -149,10 +143,36 @@
                         Client: platformService.platform()
                     };
                     data.Details = JSON.stringify(details);
-                }
+                };
 
-                var target = targetUrl(targets.exception);
-                logMessageToServer(target, data);
+                var logDetails = {
+                    severity: logMessageSeverity.error,
+                    category: "JavaScript",
+                    caption: "",
+                    description: "",
+                    parameters: "",
+                    details: null,
+                    exception: {
+                        message: errorMessage,
+                        url: $window.location.href,
+                        stackTrace: stackTrace,
+                        cause: "",
+                        line: null,
+                        column: null,              
+                    },
+                    methodSourceInfo: null,
+                    timeStamp: null,
+                    sequence: null
+                };
+    
+                var logMessage = {
+                    session: {
+                       client: platformService.platform()
+                    },
+                    logMessages: [logDetails]
+                };            
+        
+                logMessageToServer(logMessage);
 
             } catch (loggingError) {
                 // For developers - log the log-failure.
@@ -164,17 +184,27 @@
         function logMessage(severity, category, caption, description, parameters, details) {
 
             var logDetails = {
-                Severity: severity,
-                Category: category,
-                Caption: caption,
-                Description: description,
-                Parameters: parameters,
-                Details: JSON.stringify(details)
+                severity: severity,
+                category: category,
+                caption: caption,
+                description: description,
+                parameters: parameters,
+                details: JSON.stringify(details),
+                exception: null,
+                methodSourceInfo: null,
+                timeStamp: null,
+                sequence: null
             };
 
-            var target = targetUrl(targets.general);
-            logMessageToServer(target, logDetails);
-        }
+            var logMessage = {
+                session: {
+                   client: platformService.platform()
+                },
+                logMessages: [logDetails]
+            };            
+    
+                logMessageToServer(logMessage);
+            }
 
 
         var logService = {
@@ -184,7 +214,7 @@
         }
         return (logService);
     }])
-    .factory("gibraltar.stacktraceService", ["$log", function ($log) {
+    .factory("loupe.stacktraceService", ["$log", function ($log) {
 
         try {
             var stackTrace = new StackTrace();
@@ -735,7 +765,7 @@
             return createStackTrace;
         }
     }])
-    .factory("gibraltar.platformService", function () {
+    .factory("loupe.platformService", function () {
 
 
         try {
@@ -1823,7 +1853,7 @@
     .config(["$provide", function ($provide) {
         // extend the error logging
         $provide.decorator("$exceptionHandler", [
-            "$delegate", "gibraltar.logService", function ($delegate, loupeLogService) {
+            "$delegate", "loupe.logService", function ($delegate, loupeLogService) {
                 return function (exception, cause) {
                     // Calls the original $exceptionHandler.
                     $delegate(exception, cause);

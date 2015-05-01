@@ -12,15 +12,6 @@
             information: 8,
             verbose: 16,
         };
-        var targets = {
-            base: "/Loupe/Log/",
-            general: "Message",
-            exception: "Exception"
-        };
-
-        function targetUrl(endpoint) {
-            return targets.base + endpoint;
-        }
 
         function getRoute() {
             // get the data from standard angular route provider
@@ -47,6 +38,7 @@
                 return null;
             }
         }
+        
         function getState() {
             // get the data from the ui-router state provider
             var state;
@@ -68,6 +60,7 @@
                 return null;
             }
         }
+        
         function getLocation() {
             var location = $injector.get("$location");
             return {
@@ -78,6 +71,7 @@
                 parameters: []
             }
         }
+        
         function getRouteState() {
 
             var route = getRoute();
@@ -106,16 +100,27 @@
             return null;
         }
 
-        function logMessageToServer(target, errorDetails) {
-            var http = $injector.get("$http");
-            http.post(target, angular.toJson(errorDetails))
-                .error(function logMessageError(data, status, headers, config) {
-                    $log.warn("Loupe Angular Logger: Exception while attempting to log to " + target);
-                    $log.log("  status: " + status);
-                    $log.log("  data: " + data);
-                });
+        function logMessageToServer(message) {
+            
+            var logMessage = {
+                session: {
+                   client: platformService.platform()
+                },
+                logMessages: [message]
+            };              
+            
+            sendMessage(logMessage);
         }
 
+        function sendMessage(logMessage){
+            var http = $injector.get("$http");
+            http.post("/Loupe/Log", angular.toJson(logMessage))
+                .error(function logMessageError(data, status, headers, config) {
+                    $log.warn("Loupe Angular Logger: Exception while attempting to log");
+                    $log.log("  status: " + status);
+                    $log.log("  data: " + data);
+                });            
+        }
 
         // Log the given error to the remote server.
         function logException(exception, cause) {
@@ -127,32 +132,35 @@
                 var routeState = getRouteState();
                 var errorMessage = exception.toString();
                 var stackTrace = getStackTrace(exception);
-
+                
                 // Log the angular error to the server.
-                var data = {
-                    Message: errorMessage,
-                    Url: $window.location.href,
-                    StackTrace: stackTrace,
-                    Cause: (cause || "")
+//                if (routeState) {
+//                    data.Controller = routeState.controller;
+//
+//                    var details = {
+//                        Page: {
+//                            RouteName: routeState.name,
+//                            RouteUrl: routeState.url,
+//                            Controller: routeState.controller,
+//                            TemplateUrl: routeState.templateUrl,
+//                            Parameters: routeState.parameters
+//                        }
+//                    };
+//                    data.Details = JSON.stringify(details);
+//                };
+
+                var loupeException = {
+                    message: errorMessage,
+                    url: $window.location.href,
+                    stackTrace: stackTrace,
+                    cause: cause || "",
+                    line: null,
+                    column: null,                        
                 };
-                if (routeState) {
-                    data.Controller = routeState.controller;
 
-                    var details = {
-                        Page: {
-                            RouteName: routeState.name,
-                            RouteUrl: routeState.url,
-                            Controller: routeState.controller,
-                            TemplateUrl: routeState.templateUrl,
-                            Parameters: routeState.parameters
-                        },
-                        Client: platformService.platform()
-                    };
-                    data.Details = JSON.stringify(details);
-                }
+                var message = createMessage(logMessageSeverity.error,"JavaScript","","",null,null,loupeException,null);
 
-                var target = targetUrl(targets.exception);
-                logMessageToServer(target, data);
+                logMessageToServer(message);
 
             } catch (loggingError) {
                 // For developers - log the log-failure.
@@ -161,19 +169,28 @@
             }
         }
 
-        function logMessage(severity, category, caption, description, parameters, details) {
-
-            var logDetails = {
-                Severity: severity,
-                Category: category,
-                Caption: caption,
-                Description: description,
-                Parameters: parameters,
-                Details: JSON.stringify(details)
+        function createMessage(severity, category, caption, description, parameters, details, exception, methodSourceInfo){
+            var message = {
+              severity: severity,
+              category: category,
+              caption: caption,
+              description: description,
+              parameters: parameters,
+              details: details,
+              exception: exception,
+              methodSourceInfo: null,
+              timeStamp: null,
+              sequence: null
             };
+            
+            return message;        
+        }
 
-            var target = targetUrl(targets.general);
-            logMessageToServer(target, logDetails);
+        function logMessage(severity, category, caption, description, parameters, details) {
+            
+            var message = createMessage(severity,category, caption, description, parameters, details, null,null);
+        
+            logMessageToServer(message);
         }
 
 

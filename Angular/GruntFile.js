@@ -63,7 +63,13 @@ module.exports = function(grunt){
 							 'spec/vendor/platform.js']
 				}
 			}			
-		}		
+		},
+		watch: {
+			scripts: {
+				files: ['src/Loupe.Agent.Angular.js', 'spec/*.js','spec/helpers/app.js'],
+				tasks: 'test'
+			}
+		}			
 	});
 	
 	grunt.loadNpmTasks('grunt-contrib-clean');
@@ -72,6 +78,7 @@ module.exports = function(grunt){
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-connect');
 	grunt.loadNpmTasks('grunt-contrib-jasmine');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('test',['connect','jasmine:unit']);
 	grunt.registerTask('default',['clean','copy', 'uglify','connect', 'jasmine:build']);

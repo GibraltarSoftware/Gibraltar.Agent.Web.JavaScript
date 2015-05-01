@@ -27,10 +27,10 @@
 
 
     function log(severity, category, caption, description, parameters, details) {
-
-        var target = targetUrl();
-
-        setTimeout(logMessage, 10, severity, category, caption, description, parameters, details, target);
+        
+        var message = createMessage(severity,category, caption, description, parameters, details, null,null);
+        
+        setTimeout(logMessageToServer, 10, message);
     }
 
     function createHelpers() {
@@ -156,39 +156,22 @@
     }
 
     function logError(msg, url, line, column, error) {
-        var target = targetUrl();
 
-        var message = {
-          severity: loupe.logMessageSeverity.error,
-          category: "JavaScript",
-          caption: '',
-          description: '',
-          parameters: [],
-          details: null,
-          exception: {
+        var exception = {
             message: msg,
             url: url,
             stackTrace: getStackTrace(error, msg),
             cause: "",
             line: line,
-            column: column,              
-          },
-          methodSourceInfo: null,
-          timeStamp: null,
-          sequence: null
+            column: column            
         };
 
-        var logMessage = {
-            session: {
-               client: getPlatform()
-            },
-            logMessages: [message]
-        };
+        var message = createMessage(loupe.logMessageSeverity.error,"JavaScript","","",null,null,exception,null);
 
-        return sendLog(target, logMessage);
+        return logMessageToServer(message);
     }
 
-    function logMessage(severity, category, caption, description, parameters, details, target) {
+    function createMessage(severity, category, caption, description, parameters, details, exception, methodSourceInfo){
         var message = {
           severity: severity,
           category: category,
@@ -196,56 +179,57 @@
           description: description,
           parameters: parameters,
           details: details,
-          exception: null,
+          exception: exception,
           methodSourceInfo: null,
           timeStamp: null,
           sequence: null
         };
+        
+        return message;        
+    }
 
+    function logMessageToServer(message) {
         var logMessage = {
             session: {
                client: getPlatform()
             },
             logMessages: [message]
         };
-
-        sendLog(target, logMessage);
+         
+        sendMessage(logMessage);
+        
+        return true;
     }
 
-    function targetUrl() {
-        return window.location.origin + '/loupe/log';
-    }
-
-    function sendLog(target, errorDetails) {
+    function sendMessage(logMessage){
         try {
             if (typeof (XMLHttpRequest) === "undefined") {
                 console.log("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
                 return false;
             }
 
-            consoleLog(errorDetails);
+            consoleLog(logMessage);
 
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     // finished loading
                     if (xhr.status < 200 || xhr.status > 206) {
-                        console.log("Loupe JavaScript Logger: Failed to log to " + target);
+                        console.log("Loupe JavaScript Logger: Failed to log to " + window.location.origin + '/loupe/log');
                         console.log("  Status: " + xhr.status + ": " + xhr.statusText);
                     }
                 }
             };
-            xhr.open("POST", target);
+            xhr.open("POST", window.location.origin + '/loupe/log');
             xhr.setRequestHeader("Content-type", "application/json");
-            xhr.send(JSON.stringify(errorDetails));
+            xhr.send(JSON.stringify(logMessage));
 
         } catch (e) {
             consoleLog("Loupe JavaScript Logger: Exception while attempting to log to " + target);
             console.dir(e);
             return false;
         }
-
-        return true;
+        
     }
 
     function consoleLog(msg) {

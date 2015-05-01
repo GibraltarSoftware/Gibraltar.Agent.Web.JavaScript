@@ -1,6 +1,6 @@
 ﻿describe('When an exception occurs', function() {
 
-    var expectedUrl = '/Loupe/Log/Exception';
+    var expectedUrl = '/Loupe/Log';
 
     var $scope, ctrl, logService;
 
@@ -51,7 +51,7 @@
 
         $httpBackend.expectPOST(expectedUrl, function(requestBody) {
             var data = JSON.parse(requestBody);
-            expect(data.Message).toBe('Simple Error');
+            expect(data.logMessages[0].exception.message).toBe('Simple Error');
             return true;
         }).respond(200);
         $httpBackend.flush();
@@ -61,9 +61,31 @@
     it('Should log simple error from controller', inject(function($httpBackend) {
         $httpBackend.expectPOST(expectedUrl, function (requestBody) {
             var data = JSON.parse(requestBody);
-            expect(data.Message).toBe('Simple Error');
+            expect(data.logMessages[0].exception.message).toBe('Simple Error');
             return true;
         }).respond(200);
+        ctrl.throwSimpleError();
+        $httpBackend.flush();
+    }));
+
+    it('Should have expected message structure', inject(function ($httpBackend) {
+        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
+            var data = JSON.parse(requestBody);
+
+            expect(data['session']).toBeDefined('session missing');
+            var session = data.session;
+            expect(session['client']).toBeDefined('client details missing');
+            
+            checkClientMessageStructure(session.client);
+            
+            expect(data['logMessages']).toBeDefined('log messages missing');
+            checkMessageStructure(data.logMessages[0]);
+            
+            checkExceptionStructure(data.logMessages[0].exception);
+           
+            return true;
+        }).respond(200);
+
         ctrl.throwSimpleError();
         $httpBackend.flush();
     }));

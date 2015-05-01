@@ -1,5 +1,5 @@
 ﻿describe('When logging a message', function() {
-    var expectedUrl = '/Loupe/Log/Message';
+    var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService;
 
     beforeEach(module('testApp', function ($exceptionHandlerProvider) {
@@ -37,7 +37,7 @@
         $httpBackend.expectPOST(expectedUrl, function (requestBody) {
             var data = JSON.parse(requestBody);
 
-            expect(data.Severity).toEqual(logService.logMessageSeverity.information);
+            expect(data.logMessages[0].severity).toEqual(logService.logMessageSeverity.information);
             return true;
         }).respond(200);
 
@@ -49,7 +49,7 @@
         $httpBackend.expectPOST(expectedUrl, function (requestBody) {
             var data = JSON.parse(requestBody);
 
-            expect(data.Category).toEqual("test");
+            expect(data.logMessages[0].category).toEqual("test");
             return true;
         }).respond(200);
 
@@ -61,7 +61,26 @@
         $httpBackend.expectPOST(expectedUrl, function (requestBody) {
             var data = JSON.parse(requestBody);
 
-            expect(data.Caption).toEqual("Test expected message");
+            expect(data.logMessages[0].caption).toEqual("Test expected message");
+            return true;
+        }).respond(200);
+
+        $scope.logMessage("Test expected message");
+        $httpBackend.flush();
+    }));
+
+    it('Should have expected message structure', inject(function ($httpBackend) {
+        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
+            var data = JSON.parse(requestBody);
+
+            expect(data['session']).toBeDefined('session missing');
+            var session = data.session;
+            expect(session['client']).toBeDefined('client details missing');
+            checkClientMessageStructure(session.client);
+            
+            expect(data['logMessages']).toBeDefined('log messages missing');
+            checkMessageStructure(data.logMessages[0]);
+            
             return true;
         }).respond(200);
 
