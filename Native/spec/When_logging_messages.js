@@ -49,6 +49,14 @@
         
     });
 
+    it('Should have timestamp', function(){
+        var partialTimeStamp = createTimeStamp();
+        
+        var body = JSON.parse(requests[0].requestBody);
+        console.info(body.logMessages[0].timeStamp);
+        expect(body.logMessages[0].timeStamp).toContain(partialTimeStamp);
+    });
+
     function log() {
         loupe.agent.log(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'], 'with details');
     }

@@ -124,3 +124,18 @@ function checkMessageStructure(message){
     expect(message['timeStamp']).toBeDefined('timeStamp missing');
     expect(message['sequence']).toBeDefined('sequence missing');        
 }
+
+function createTimeStamp() {
+    var now = new Date(),
+        tzo = -now.getTimezoneOffset(),
+        dif = tzo >= 0 ? '+' : '-',
+        pad = function(num) {
+            var norm = Math.abs(Math.floor(num));
+            return (norm < 10 ? '0' : '') + norm;
+        };
+    return now.getFullYear() 
+        + '-' + pad(now.getMonth()+1)
+        + '-' + pad(now.getDate())
+        + 'T' + pad(now.getHours())
+        + ':' + pad(now.getMinutes());
+}

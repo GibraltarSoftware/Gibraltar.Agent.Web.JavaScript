@@ -56,6 +56,14 @@
         expect(exception['line']).toBeDefined('exception line missing');    
     }
 
+    it('Should have timestamp', function(){
+        var partialTimeStamp = createTimeStamp();
+        
+        var body = JSON.parse(requests[0].requestBody);
+        console.info(body.logMessages[0].timeStamp);
+        expect(body.logMessages[0].timeStamp).toContain(partialTimeStamp);
+    });
+
     function createError() {
         setTimeout(function () {
             throw new Error("Test Error");

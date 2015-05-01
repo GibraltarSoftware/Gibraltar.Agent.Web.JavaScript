@@ -132,3 +132,18 @@ function checkExceptionStructure(exception){
     expect(exception['cause']).toBeDefined('exception cause missing');
     expect(exception['line']).toBeDefined('exception line missing');    
 }
+
+function createTimeStamp() {
+    var now = new Date(),
+        tzo = -now.getTimezoneOffset(),
+        dif = tzo >= 0 ? '+' : '-',
+        pad = function(num) {
+            var norm = Math.abs(Math.floor(num));
+            return (norm < 10 ? '0' : '') + norm;
+        };
+    return now.getFullYear() 
+        + '-' + pad(now.getMonth()+1)
+        + '-' + pad(now.getDate())
+        + 'T' + pad(now.getHours())
+        + ':' + pad(now.getMinutes());
+}

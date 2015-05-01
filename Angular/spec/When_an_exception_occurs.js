@@ -90,4 +90,17 @@
         $httpBackend.flush();
     }));
 
+    it('Should have time stamp', inject(function ($httpBackend) {
+        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
+            var partialTimeStamp = createTimeStamp();
+            var data = JSON.parse(requestBody);
+
+            expect(data.logMessages[0].timeStamp).toContain(partialTimeStamp);
+            return true;
+        }).respond(200);
+
+        ctrl.throwSimpleError();
+        $httpBackend.flush();
+    }));
+
 });
