@@ -10,7 +10,8 @@ module.exports = function(grunt){
 					' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */'
 		},
 		clean: {
-			build:['dist']
+			build:['dist'],
+			debug: '_SpecRunner.html'
 		},
 		jshint: {
 			all:['src/Loupe.Agent.Angular.js']
@@ -34,12 +35,17 @@ module.exports = function(grunt){
 				options: {
 					port: 3377
 				}
+			},
+			debug: {
+				options: {
+					port: 3378,
+					keepalive: true,
+					open: "http://localhost:3378/_SpecRunner.html"
+				}
 			}
 		},
 		jasmine : {
-			unit: {
-				src: 'src/Loupe.Agent.Angular.js',
-				options : {
+			options: {
 					host: 'http://127.0.0.1:3377',
 					specs : ['spec/*.js','!spec/When_logging_stack_trace.js'],
 					helpers: ['spec/helpers/*.js'],
@@ -47,20 +53,20 @@ module.exports = function(grunt){
 							 'spec/vendor/angular-route.js',
 							 'spec/vendor/angular-mocks.js',
 							 'spec/vendor/angular-ui-router.js', 
-							 'spec/vendor/platform.js']
-				}
+							 'spec/vendor/platform.js']				
 			},
+			unit: {
+				src: 'src/Loupe.Agent.Angular.js',
+			},
+			debug: {
+				src: 'src/Loupe.Agent.Angular.js',
+				options : {
+					keepRunner: true
+				}
+			},			
 			build: {
 				src: 'dist/Loupe.Agent.Angular.min.js',
 				options : {
-					host: 'http://127.0.0.1:3377',
-					specs : ['spec/*.js','!spec/When_logging_stack_trace.js'],
-					helpers: ['spec/helpers/*.js'],
-					vendor: ['spec/vendor/angular.js', 
-							 'spec/vendor/angular-route.js',
-							 'spec/vendor/angular-mocks.js',
-							 'spec/vendor/angular-ui-router.js', 
-							 'spec/vendor/platform.js'],
 			        template : require('grunt-template-jasmine-istanbul'),
 			        templateOptions: {
 			          coverage: 'reports/coverage.json',
@@ -85,6 +91,7 @@ module.exports = function(grunt){
 	grunt.loadNpmTasks('grunt-contrib-jasmine');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
-	grunt.registerTask('test',['connect','jasmine:unit']);
-	grunt.registerTask('default',['clean','copy', 'uglify','connect', 'jasmine:build']);
+	grunt.registerTask('debug',['clean:debug','connect:server', 'jasmine:debug', 'connect:debug']);
+	grunt.registerTask('test',['connect:server','jasmine:unit']);
+	grunt.registerTask('default',['clean','copy', 'uglify','connect:server', 'jasmine:build']);
 };

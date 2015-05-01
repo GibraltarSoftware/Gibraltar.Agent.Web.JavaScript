@@ -10,8 +10,9 @@ module.exports = function(grunt){
 					' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */'
 		},
 		clean: {
-			build:['dist'],
-			test: ['node_modules/grunt-contrib-jasmine/tasks/jasmine.js']
+			build: 'dist',
+			debug: '_SpecRunner.html',
+			test: 'node_modules/grunt-contrib-jasmine/tasks/jasmine.js'
 		},
 		jshint: {
 			all:['src/Loupe.Agent.Native.js']
@@ -39,29 +40,36 @@ module.exports = function(grunt){
 				options: {
 					port: 3377
 				}
+			},
+			debug:{
+				options: {
+					port: 3378,
+					keepalive: true,
+					open: "http://localhost:3378/_SpecRunner.html"
+				}				
 			}
 		},
 		jasmine : {
-			unit: {
-				src: 'src/Loupe.Agent.Native.js',
-				options : {
+			options: {
 					host: 'http://127.0.0.1:3377',
 					specs : ['spec/*.js', '!spec/When_propagating_error.js'],
 					helpers: ['spec/helpers/*.js'],
 					vendor: ['spec/vendor/sinon.js', 'spec/vendor/platform.js'],
 					ignoreError: true,
-					outputTrace: false,									
+					outputTrace: false,					
+			},
+			unit: {
+				src: 'src/Loupe.Agent.Native.js'
+			},
+			debug: {
+				src: 'src/Loupe.Agent.Native.js',
+				options: {
+					keepRunner: true
 				}
 			},
 			build: {
 				src: 'dist/Loupe.Agent.Native.min.js',
 				options : {
-					host: 'http://127.0.0.1:3377',
-					specs : ['spec/*.js', '!spec/When_propagating_error.js'],
-					helpers: ['spec/helpers/*.js'],
-					vendor: ['spec/vendor/sinon.js', 'spec/vendor/platform.js'],
-					ignoreError: true,
-					outputTrace: false,
 			        template : require('grunt-template-jasmine-istanbul'),
 			        templateOptions: {
 			          coverage: 'reports/coverage.json',
@@ -86,6 +94,7 @@ module.exports = function(grunt){
 	grunt.loadNpmTasks('grunt-contrib-jasmine');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
+	grunt.registerTask('debug',['clean:debug','connect:server', 'jasmine:debug', 'connect:debug']);
 	grunt.registerTask('test',['clean:test','copy:test', 'connect','jasmine:unit']);
 	grunt.registerTask('default',['clean:build','copy:main', 'uglify', 'connect', 'jasmine:build']);
 };
