@@ -60,7 +60,12 @@ module.exports = function(grunt){
 							 'spec/vendor/angular-route.js',
 							 'spec/vendor/angular-mocks.js',
 							 'spec/vendor/angular-ui-router.js', 
-							 'spec/vendor/platform.js']
+							 'spec/vendor/platform.js'],
+			        template : require('grunt-template-jasmine-istanbul'),
+			        templateOptions: {
+			          coverage: 'reports/coverage.json',
+			          report: 'reports/coverage'
+			        }								 
 				}
 			}			
 		},

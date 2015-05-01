@@ -50,7 +50,7 @@ module.exports = function(grunt){
 					helpers: ['spec/helpers/*.js'],
 					vendor: ['spec/vendor/sinon.js', 'spec/vendor/platform.js'],
 					ignoreError: true,
-					outputTrace: false
+					outputTrace: false,									
 				}
 			},
 			build: {
@@ -61,7 +61,12 @@ module.exports = function(grunt){
 					helpers: ['spec/helpers/*.js'],
 					vendor: ['spec/vendor/sinon.js', 'spec/vendor/platform.js'],
 					ignoreError: true,
-					outputTrace: false
+					outputTrace: false,
+			        template : require('grunt-template-jasmine-istanbul'),
+			        templateOptions: {
+			          coverage: 'reports/coverage.json',
+			          report: 'reports/coverage'
+			        }						
 				}
 			}			
 		},
