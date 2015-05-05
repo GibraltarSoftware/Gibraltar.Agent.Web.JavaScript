@@ -32,6 +32,10 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
     $scope.critical = function(caption, description, exception, details){
         logService.critical('test',caption, description,null, exception, details);
     };    
+    
+    $scope.verbose = function(caption, description, exception, details){
+        logService.verbose('test',caption, description,null, exception, details);
+    };      
 }]);
 
 

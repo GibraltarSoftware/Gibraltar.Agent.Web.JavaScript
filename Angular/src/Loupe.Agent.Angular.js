@@ -17,6 +17,7 @@
             verbose: 16,
         };
 
+        var verbose = partial(logMessage, logMessageSeverity.verbose);
         var information = partial(logMessage, logMessageSeverity.information);
         var warning = partial(logMessage, logMessageSeverity.warning);
         var error = partial(logMessage, logMessageSeverity.error);
@@ -25,6 +26,7 @@
         var logService = {
             exception: logException,
             log: logMessage,
+            verbose: verbose,
             information: information,
             warning: warning,
             error: error,

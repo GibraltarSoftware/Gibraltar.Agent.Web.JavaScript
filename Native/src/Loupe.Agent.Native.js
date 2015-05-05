@@ -20,12 +20,14 @@
 
     setUpOnError(window);
 
+    var verbose = partial(log, loupe.logMessageSeverity.verbose);
     var information = partial(log, loupe.logMessageSeverity.information);
     var warning = partial(log, loupe.logMessageSeverity.warning);
     var error = partial(log, loupe.logMessageSeverity.error);
     var critical = partial(log, loupe.logMessageSeverity.critical);
 
     loupe.agent = {
+        verbose: verbose,
         information: information,
         warning: warning,
         error: error,
