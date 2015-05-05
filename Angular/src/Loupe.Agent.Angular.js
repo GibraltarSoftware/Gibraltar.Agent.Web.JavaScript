@@ -16,6 +16,18 @@
             verbose: 16,
         };
 
+        var logService = {
+            exception: logException,
+            log: logMessage,
+            information: information,
+            informationDetail: informationDetail,
+            logMessageSeverity: logMessageSeverity,
+            setSessionId: setSessionId
+        };
+        
+        return  logService;
+
+
         function getRoute() {
             // get the data from standard angular route provider
 
@@ -213,24 +225,33 @@
                 + ':' + pad(tzo % 60);
         }    
 
-        function logMessage(severity, category, caption, description, parameters, details) {
-            
-            var message = createMessage(severity,category, caption, description, parameters, details, null,null);
+        function logMessage(severity, category, caption, description, parameters, details, exception) {
+            if(typeof exception == 'undefined'){
+                exception = null;
+            }
+            var message = createMessage(severity,
+                                        category, 
+                                        caption, 
+                                        description, 
+                                        parameters, 
+                                        details, 
+                                        exception,
+                                        null);
         
             logMessageToServer(message);
+        }
+
+        function information(category, caption, description, parameters, exception){
+            logMessage(logMessageSeverity.information,category,caption,description,parameters,null,exception);
+        }
+
+        function informationDetail(category, caption, description, parameters, exception, detail){
+            logMessage(logMessageSeverity.information,category,caption,description,parameters,detail,exception);
         }
 
         function setSessionId(value){
             sessionId = value;
         }
-
-        var logService = {
-            exception: logException,
-            log: logMessage,
-            logMessageSeverity: logMessageSeverity,
-            setSessionId: setSessionId
-        }
-        return (logService);
     }])
     .factory("loupe.stacktraceService", ["$log", function ($log) {
 
