@@ -23,11 +23,13 @@
     var information = partial(log, loupe.logMessageSeverity.information);
     var warning = partial(log, loupe.logMessageSeverity.warning);
     var error = partial(log, loupe.logMessageSeverity.error);
+    var critical = partial(log, loupe.logMessageSeverity.critical);
 
     loupe.agent = {
         information: information,
         warning: warning,
         error: error,
+        critical: critical,
         log: log,
         setSessionId: setSessionId,
         propagateOnError: propagateError

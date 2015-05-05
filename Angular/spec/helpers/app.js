@@ -26,8 +26,12 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
     };
    
     $scope.error = function(caption, description, exception, details){
-        logService.warning('test',caption, description,null, exception, details);
+        logService.error('test',caption, description,null, exception, details);
     };
+    
+    $scope.critical = function(caption, description, exception, details){
+        logService.critical('test',caption, description,null, exception, details);
+    };    
 }]);
 
 

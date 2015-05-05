@@ -20,6 +20,7 @@
         var information = partial(logMessage, logMessageSeverity.information);
         var warning = partial(logMessage, logMessageSeverity.warning);
         var error = partial(logMessage, logMessageSeverity.error);
+        var critical = partial(logMessage, logMessageSeverity.critical);
         
         var logService = {
             exception: logException,
@@ -27,6 +28,7 @@
             information: information,
             warning: warning,
             error: error,
+            critical: critical,
             logMessageSeverity: logMessageSeverity,
             setSessionId: setSessionId
         };
