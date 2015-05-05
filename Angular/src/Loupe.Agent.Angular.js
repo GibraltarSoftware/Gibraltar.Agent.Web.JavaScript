@@ -19,12 +19,14 @@
 
         var information = partial(logMessage, logMessageSeverity.information);
         var warning = partial(logMessage, logMessageSeverity.warning);
+        var error = partial(logMessage, logMessageSeverity.error);
         
         var logService = {
             exception: logException,
             log: logMessage,
             information: information,
-            warning: warning,        
+            warning: warning,
+            error: error,
             logMessageSeverity: logMessageSeverity,
             setSessionId: setSessionId
         };

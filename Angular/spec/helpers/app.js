@@ -21,12 +21,13 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
         logService.information('test',caption, description,null, exception, details);
     };
     
-    
     $scope.warning = function(caption, description, exception, details){
         logService.warning('test',caption, description,null, exception, details);
     };
    
-    
+    $scope.error = function(caption, description, exception, details){
+        logService.warning('test',caption, description,null, exception, details);
+    };
 }]);
 
 
