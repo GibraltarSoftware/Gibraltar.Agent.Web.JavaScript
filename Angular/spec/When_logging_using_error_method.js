@@ -31,7 +31,7 @@ describe('When logging using error method', function() {
             expect(data.category).toEqual('test');
             expect(data.caption).toEqual('information logging');
             expect(data.description).toEqual('testing logging using information method');
-            expect(data.severity).toEqual(logService.logMessageSeverity.warning);
+            expect(data.severity).toEqual(logService.logMessageSeverity.error);
             
             return true;
         }).respond(200);
@@ -59,7 +59,7 @@ describe('When logging using error method', function() {
             var data = JSON.parse(requestBody).logMessages[0];
             
             expect(data.details).toEqual("<data>details</data>");
-            expect(data.severity).toEqual(logService.logMessageSeverity.warning);
+            expect(data.severity).toEqual(logService.logMessageSeverity.error);
             
             return true;
         }).respond(200);
