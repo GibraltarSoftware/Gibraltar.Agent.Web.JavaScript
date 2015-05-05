@@ -17,15 +17,15 @@
             verbose: 16,
         };
 
-        var verbose = partial(logMessage, logMessageSeverity.verbose);
-        var information = partial(logMessage, logMessageSeverity.information);
-        var warning = partial(logMessage, logMessageSeverity.warning);
-        var error = partial(logMessage, logMessageSeverity.error);
-        var critical = partial(logMessage, logMessageSeverity.critical);
+        var verbose = partial(write, logMessageSeverity.verbose);
+        var information = partial(write, logMessageSeverity.information);
+        var warning = partial(write, logMessageSeverity.warning);
+        var error = partial(write, logMessageSeverity.error);
+        var critical = partial(write, logMessageSeverity.critical);
         
         var logService = {
             exception: logException,
-            log: logMessage,
+            write: write,
             verbose: verbose,
             information: information,
             warning: warning,
@@ -259,7 +259,7 @@
             return  parameter;
         }
 
-        function logMessage(severity, category, caption, description, parameters, exception, details) {
+        function write(severity, category, caption, description, parameters, exception, details) {
             exception = sanitiseArgument(exception);
             details = sanitiseArgument(details);
         

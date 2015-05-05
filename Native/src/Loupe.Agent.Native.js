@@ -20,11 +20,11 @@
 
     setUpOnError(window);
 
-    var verbose = partial(log, loupe.logMessageSeverity.verbose);
-    var information = partial(log, loupe.logMessageSeverity.information);
-    var warning = partial(log, loupe.logMessageSeverity.warning);
-    var error = partial(log, loupe.logMessageSeverity.error);
-    var critical = partial(log, loupe.logMessageSeverity.critical);
+    var verbose = partial(write, loupe.logMessageSeverity.verbose);
+    var information = partial(write, loupe.logMessageSeverity.information);
+    var warning = partial(write, loupe.logMessageSeverity.warning);
+    var error = partial(write, loupe.logMessageSeverity.error);
+    var critical = partial(write, loupe.logMessageSeverity.critical);
 
     loupe.agent = {
         verbose: verbose,
@@ -32,7 +32,7 @@
         warning: warning,
         error: error,
         critical: critical,
-        log: log,
+        write: write,
         setSessionId: setSessionId,
         propagateOnError: propagateError
     };
@@ -57,7 +57,7 @@
     }
 
 
-    function log(severity, category, caption, description, parameters, exception, details) {        
+    function write(severity, category, caption, description, parameters, exception, details) {        
         exception = sanitiseArgument(exception);
         details = sanitiseArgument(details);
         
