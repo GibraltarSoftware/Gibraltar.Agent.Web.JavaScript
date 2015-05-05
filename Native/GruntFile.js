@@ -52,7 +52,7 @@ module.exports = function(grunt){
 		jasmine : {
 			options: {
 					host: 'http://127.0.0.1:3377',
-					specs : ['spec/*.js', '!spec/When_propagating_error.js'],
+					specs : ['spec/*.js'],
 					helpers: ['spec/helpers/*.js'],
 					vendor: ['spec/vendor/sinon.js', 'spec/vendor/platform.js'],
 					ignoreError: true,
@@ -95,6 +95,6 @@ module.exports = function(grunt){
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('debug',['clean:debug','connect:server', 'jasmine:debug', 'connect:debug']);
-	grunt.registerTask('test',['clean:test','copy:test', 'connect','jasmine:unit']);
+	grunt.registerTask('test',['clean:test','copy:test', 'connect:server','jasmine:unit']);
 	grunt.registerTask('default',['clean:build','copy:main', 'uglify', 'connect', 'jasmine:build']);
 };

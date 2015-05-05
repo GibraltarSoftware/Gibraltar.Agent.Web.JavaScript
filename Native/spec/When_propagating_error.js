@@ -1,6 +1,20 @@
 ﻿describe('When propagating error', function() {
 
-    var xhr, requests;
+    var xhr, requests, existingOnError;
+
+    beforeEach(function(){
+        existingOnError = window.onerror;
+        window.postErrorHandlerCalled = false;
+        
+        window.onerror = function() { 
+            
+            if(existingOnError){
+                 existingOnError.apply(this, arguments);
+            }
+            
+            window.postErrorHandlerCalled = true;
+        };
+    });
 
     beforeEach(function(done) {
 
@@ -10,7 +24,7 @@
             requests.push(req);
         };
 
-        gibraltar.agent.propagateOnError = true;
+        loupe.agent.propagateOnError = true;
         spyOn(console, 'error');
         createSimpleError();
         requestComplete(done);
@@ -18,10 +32,11 @@
 
     afterEach(function() {
         xhr.restore();
+        window.onerror = existingOnError;
     });
 
     it('Should propagate error outside of agent', function() {
-        expect(console.error).toHaveBeenCalled();
+        expect(window.postErrorHandlerCalled).toEqual(true) ;
     });
 
 
