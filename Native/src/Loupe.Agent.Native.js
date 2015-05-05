@@ -21,6 +21,8 @@
     setUpOnError(window);
 
     loupe.agent = {
+        information: information,
+        informationDetail: informationDetail,
         log: log,
         setSessionId: setSessionId,
         propagateOnError: propagateError
@@ -33,11 +35,34 @@
     }
 
 
-    function log(severity, category, caption, description, parameters, details) {
+    function log(severity, category, caption, description, parameters, details, exception) {
+        if (typeof exception == 'undefined'){
+            exception = null;
+        }
         
-        var message = createMessage(severity,category, caption, description, parameters, details, null,null);
+        var message = createMessage(severity,category, caption, description, parameters, details, exception,null);
         
         setTimeout(logMessageToServer, 10, message);
+    }
+
+    function information(category, caption, description, parameters, exception){
+        log(loupe.logMessageSeverity.information, 
+            category, 
+            caption, 
+            description, 
+            parameters, 
+            null, 
+            exception);
+    }
+
+    function informationDetail(category, caption, description, parameters, exception, details){
+        log(loupe.logMessageSeverity.information, 
+            category, 
+            caption, 
+            description, 
+            parameters, 
+            details, 
+            exception);        
     }
 
     function createHelpers() {

@@ -139,3 +139,35 @@ function createTimeStamp() {
         + 'T' + pad(now.getHours())
         + ':' + pad(now.getMinutes());
 }
+
+function Messages(){
+    
+    var requests=[];
+    
+    this.init = function(requestsToMonitor){
+        requests = requestsToMonitor;
+    }
+    
+    this.getRequestBody = function (){
+        return  JSON.parse(requests[0].requestBody);
+    };
+    
+    this.waitToBeLogged = function waitForMessageRecieved(fn){
+        sometimeWhen(function () { return requests.length > 0;}, fn);        
+    };   
+    
+    function sometimeWhen(test, then){
+        async(function () {
+            if ( test() ) {
+                then();
+            } else {
+                async(arguments.callee);
+            }
+        });        
+    }
+    
+    function async (fn) {
+        setTimeout(fn, 10);
+    }    
+};
+
