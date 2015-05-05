@@ -23,6 +23,8 @@
     loupe.agent = {
         information: information,
         informationDetail: informationDetail,
+        warning: warning,
+        warningDetail: warningDetail,
         log: log,
         setSessionId: setSessionId,
         propagateOnError: propagateError
@@ -35,10 +37,9 @@
     }
 
 
-    function log(severity, category, caption, description, parameters, details, exception) {
-        if (typeof exception == 'undefined'){
-            exception = null;
-        }
+    function log(severity, category, caption, description, parameters, exception, details) {        
+        exception = sanitiseArgument(exception);
+        details = sanitiseArgument(details);
         
         var message = createMessage(severity,category, caption, description, parameters, details, exception,null);
         
@@ -46,23 +47,27 @@
     }
 
     function information(category, caption, description, parameters, exception){
-        log(loupe.logMessageSeverity.information, 
-            category, 
-            caption, 
-            description, 
-            parameters, 
-            null, 
-            exception);
+        log(loupe.logMessageSeverity.information, category, caption, description, parameters, exception);
     }
 
     function informationDetail(category, caption, description, parameters, exception, details){
-        log(loupe.logMessageSeverity.information, 
-            category, 
-            caption, 
-            description, 
-            parameters, 
-            details, 
-            exception);        
+        log(loupe.logMessageSeverity.information,  category, caption, description, parameters, exception, details);        
+    }
+
+    function warning(category, caption, description, parameters, exception){
+        log(loupe.logMessageSeverity.warning, category, caption, description, parameters, exception);
+    }
+
+    function warningDetail(category, caption, description, parameters, exception, details){
+        log(loupe.logMessageSeverity.warning,  category, caption, description, parameters, exception,details);        
+    }
+
+    function sanitiseArgument(parameter){
+        if (typeof parameter == 'undefined'){
+            return null;
+        }
+        
+        return  parameter;
     }
 
     function createHelpers() {

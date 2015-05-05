@@ -69,7 +69,7 @@
     })
 
     function log() {
-        loupe.agent.log(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'], 'with details');
+        loupe.agent.log(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'],null, 'with details');
     }
 
     function requestComplete(done) {

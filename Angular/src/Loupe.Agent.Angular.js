@@ -21,6 +21,8 @@
             log: logMessage,
             information: information,
             informationDetail: informationDetail,
+            warning: information,
+            warningDetail: informationDetail,            
             logMessageSeverity: logMessageSeverity,
             setSessionId: setSessionId
         };
@@ -247,6 +249,14 @@
 
         function informationDetail(category, caption, description, parameters, exception, detail){
             logMessage(logMessageSeverity.information,category,caption,description,parameters,detail,exception);
+        }
+
+        function warning(category, caption, description, parameters, exception){
+            logMessage(logMessageSeverity.warning,category,caption,description,parameters,null,exception);
+        }
+
+        function warningDetail(category, caption, description, parameters, exception, detail){
+            logMessage(logMessageSeverity.warning,category,caption,description,parameters,detail,exception);
         }
 
         function setSessionId(value){
