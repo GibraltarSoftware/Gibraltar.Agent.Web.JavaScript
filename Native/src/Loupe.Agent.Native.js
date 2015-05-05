@@ -20,11 +20,12 @@
 
     setUpOnError(window);
 
+    var information = partial(log, loupe.logMessageSeverity.information);
+    var warning = partial(log, loupe.logMessageSeverity.warning);
+
     loupe.agent = {
         information: information,
-        informationDetail: informationDetail,
         warning: warning,
-        warningDetail: warningDetail,
         log: log,
         setSessionId: setSessionId,
         propagateOnError: propagateError
@@ -36,6 +37,19 @@
         sessionId = value;
     }
 
+    function partial(fn /*, args...*/) {
+      // A reference to the Array#slice method.
+      var slice = Array.prototype.slice;
+      // Convert arguments object to an array, removing the first argument.
+      var args = slice.call(arguments, 1);
+    
+      return function() {
+        // Invoke the originally-specified function, passing in all originally-
+        // specified arguments, followed by any just-specified arguments.
+        return fn.apply(this, args.concat(slice.call(arguments, 0)));
+      };
+    }
+
 
     function log(severity, category, caption, description, parameters, exception, details) {        
         exception = sanitiseArgument(exception);
@@ -44,22 +58,6 @@
         var message = createMessage(severity,category, caption, description, parameters, details, exception,null);
         
         setTimeout(logMessageToServer, 10, message);
-    }
-
-    function information(category, caption, description, parameters, exception){
-        log(loupe.logMessageSeverity.information, category, caption, description, parameters, exception);
-    }
-
-    function informationDetail(category, caption, description, parameters, exception, details){
-        log(loupe.logMessageSeverity.information,  category, caption, description, parameters, exception, details);        
-    }
-
-    function warning(category, caption, description, parameters, exception){
-        log(loupe.logMessageSeverity.warning, category, caption, description, parameters, exception);
-    }
-
-    function warningDetail(category, caption, description, parameters, exception, details){
-        log(loupe.logMessageSeverity.warning,  category, caption, description, parameters, exception,details);        
     }
 
     function sanitiseArgument(parameter){

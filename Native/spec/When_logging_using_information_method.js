@@ -44,7 +44,7 @@ describe('When logging using information methods', function () {
     });    
 
     it('Should log details', function(done) {
-        loupe.agent.informationDetail('test', 'test logs message','test log description including parameter {0}',['test'], null,"<data>test details</data>");
+        loupe.agent.information('test', 'test logs message','test log description including parameter {0}',['test'], null,"<data>test details</data>");
 
         messageFn.waitToBeLogged(function(){
             var body = messageFn.getRequestBody();

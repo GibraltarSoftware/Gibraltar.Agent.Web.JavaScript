@@ -31,12 +31,12 @@ describe('When logging using warning method', function() {
             expect(data.category).toEqual('test');
             expect(data.caption).toEqual('information logging');
             expect(data.description).toEqual('testing logging using information method');
-            expect(data.severity).toEqual(logService.logMessageSeverity.information);
+            expect(data.severity).toEqual(logService.logMessageSeverity.warning);
             
             return true;
         }).respond(200);
 
-        $scope.information('information logging','testing logging using information method');
+        $scope.warning('information logging','testing logging using information method');
         $httpBackend.flush();
     }));
     
@@ -50,7 +50,7 @@ describe('When logging using warning method', function() {
         }).respond(200);
 
         var suppliedException = new Error("supplied exception");
-        $scope.information('information logging','testing logging using information method',suppliedException);
+        $scope.warning('information logging','testing logging using information method',suppliedException);
         $httpBackend.flush();
     }));
     
@@ -59,12 +59,12 @@ describe('When logging using warning method', function() {
             var data = JSON.parse(requestBody).logMessages[0];
             
             expect(data.details).toEqual("<data>details</data>");
-            expect(data.severity).toEqual(logService.logMessageSeverity.information);
+            expect(data.severity).toEqual(logService.logMessageSeverity.warning);
             
             return true;
         }).respond(200);
 
-        $scope.informationDetail('information logging','testing logging using information method',null,"<data>details</data>");
+        $scope.warning('information logging','testing logging using information method',null,"<data>details</data>");
         $httpBackend.flush();
     }));            
 });

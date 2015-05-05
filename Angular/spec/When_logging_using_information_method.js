@@ -64,7 +64,7 @@ describe('When logging using information method', function() {
             return true;
         }).respond(200);
 
-        $scope.informationDetail('information logging','testing logging using information method',null,"<data>details</data>");
+        $scope.information('information logging','testing logging using information method',null,"<data>details</data>");
         $httpBackend.flush();
     }));            
 });

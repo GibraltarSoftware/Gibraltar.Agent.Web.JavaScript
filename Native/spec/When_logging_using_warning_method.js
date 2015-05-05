@@ -46,7 +46,7 @@ describe('When logging using warning methods', function () {
     });    
 
     it('Should log severity level warning with details', function(done) {
-        loupe.agent.warningDetail('test', 'test logs message','test log description including parameter {0}',['test'], null,"<data>test details</data>");
+        loupe.agent.warning('test', 'test logs message','test log description including parameter {0}',['test'], null,"<data>test details</data>");
 
         messageFn.waitToBeLogged(function(){
             var body = messageFn.getRequestBody();

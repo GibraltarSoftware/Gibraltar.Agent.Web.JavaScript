@@ -3,6 +3,7 @@
     function ($log, $window, $injector, stacktraceService, platformService) {
         // The error log service logs angular errors to the server
         // This is called from the existing Angular exception handler, as setup by a decorator
+       
         
         var sequenceNumber = 0;
         var sessionId;
@@ -16,13 +17,14 @@
             verbose: 16,
         };
 
+        var information = partial(logMessage, logMessageSeverity.information);
+        var warning = partial(logMessage, logMessageSeverity.warning);
+        
         var logService = {
             exception: logException,
             log: logMessage,
             information: information,
-            informationDetail: informationDetail,
-            warning: information,
-            warningDetail: informationDetail,            
+            warning: warning,        
             logMessageSeverity: logMessageSeverity,
             setSessionId: setSessionId
         };
@@ -30,6 +32,22 @@
         return  logService;
 
 
+
+        function partial(fn /*, args...*/) {
+          // A reference to the Array#slice method.
+          var slice = Array.prototype.slice;
+          // Convert arguments object to an array, removing the first argument.
+          var args = slice.call(arguments, 1);
+        
+          return function() {
+            // Invoke the originally-specified function, passing in all originally-
+            // specified arguments, followed by any just-specified arguments.
+            return fn.apply(this, args.concat(slice.call(arguments, 0)));
+          };
+        }
+        
+
+        
         function getRoute() {
             // get the data from standard angular route provider
 
@@ -227,10 +245,18 @@
                 + ':' + pad(tzo % 60);
         }    
 
-        function logMessage(severity, category, caption, description, parameters, details, exception) {
-            if(typeof exception == 'undefined'){
-                exception = null;
+        function sanitiseArgument(parameter){
+            if (typeof parameter == 'undefined'){
+                return null;
             }
+            
+            return  parameter;
+        }
+
+        function logMessage(severity, category, caption, description, parameters, exception, details) {
+            exception = sanitiseArgument(exception);
+            details = sanitiseArgument(details);
+        
             var message = createMessage(severity,
                                         category, 
                                         caption, 
@@ -241,22 +267,6 @@
                                         null);
         
             logMessageToServer(message);
-        }
-
-        function information(category, caption, description, parameters, exception){
-            logMessage(logMessageSeverity.information,category,caption,description,parameters,null,exception);
-        }
-
-        function informationDetail(category, caption, description, parameters, exception, detail){
-            logMessage(logMessageSeverity.information,category,caption,description,parameters,detail,exception);
-        }
-
-        function warning(category, caption, description, parameters, exception){
-            logMessage(logMessageSeverity.warning,category,caption,description,parameters,null,exception);
-        }
-
-        function warningDetail(category, caption, description, parameters, exception, detail){
-            logMessage(logMessageSeverity.warning,category,caption,description,parameters,detail,exception);
         }
 
         function setSessionId(value){

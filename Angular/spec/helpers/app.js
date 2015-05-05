@@ -14,24 +14,18 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
     };
 
     $scope.logMessage = function(logText) {
-        logService.log(logService.logMessageSeverity.information, 'test', logText,"log description",["parameter"],"details");
+        logService.log(logService.logMessageSeverity.information, 'test', logText,"log description",["parameter"],null,"details");
     };
     
-    $scope.information = function(caption, description, exception){
-        logService.information('test',caption, description,null, exception);
+    $scope.information = function(caption, description, exception, details){
+        logService.information('test',caption, description,null, exception, details);
     };
     
-    $scope.informationDetail = function(caption, description, exception, detail){
-      logService.informationDetail('test',caption, description,null, exception, detail);  
-    };
     
-    $scope.warning = function(caption, description, exception){
-        logService.warning('test',caption, description,null, exception);
+    $scope.warning = function(caption, description, exception, details){
+        logService.warning('test',caption, description,null, exception, details);
     };
-    
-    $scope.warningDetail = function(caption, description, exception, detail){
-      logService.warningDetail('test',caption, description,null, exception, detail);  
-    };    
+   
     
 }]);
 
