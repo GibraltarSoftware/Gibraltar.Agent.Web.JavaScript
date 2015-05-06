@@ -6,6 +6,9 @@
     var propagateError = false;
     var sequenceNumber = 0;
     var sessionId;
+    var messageStorage = [];
+    var localStorageAvailable = localStorageSupported();
+    var sessionStorageAvailable = sessionStorageSupported();
     
     loupe.logMessageSeverity = {
         none: 0,
@@ -19,6 +22,8 @@
     createHelpers();
 
     setUpOnError(window);
+    setUpSequenceNumber();
+    sendAnyExistingMessages();
 
     var verbose = partial(write, loupe.logMessageSeverity.verbose);
     var information = partial(write, loupe.logMessageSeverity.information);
@@ -39,6 +44,12 @@
 
     return loupe.agent;
 
+
+    function sendAnyExistingMessages(){
+        // check for unsent messages on start up
+        setTimeout(logMessageToServer,10);        
+    }
+
     function setSessionId(value){
         sessionId = value;
     }
@@ -56,22 +67,21 @@
       };
     }
 
-
-    function write(severity, category, caption, description, parameters, exception, details) {        
-        exception = sanitiseArgument(exception);
-        details = sanitiseArgument(details);
-        
-        var message = createMessage(severity,category, caption, description, parameters, details, exception,null);
-        
-        setTimeout(logMessageToServer, 10, message);
-    }
-
     function sanitiseArgument(parameter){
         if (typeof parameter == 'undefined'){
             return null;
         }
         
         return  parameter;
+    }
+
+    function write(severity, category, caption, description, parameters, exception, details) {        
+        exception = sanitiseArgument(exception);
+        details = sanitiseArgument(details);
+        
+        createMessage(severity,category, caption, description, parameters, exception, details, null);
+        
+        setTimeout(logMessageToServer, 10);
     }
 
     function createHelpers() {
@@ -207,13 +217,99 @@
             column: column            
         };
 
-        var message = createMessage(loupe.logMessageSeverity.error,"JavaScript","","",null,null,exception,null);
+        createMessage(loupe.logMessageSeverity.error,"JavaScript","","",null,exception,null,null);
 
-        return logMessageToServer(message);
+        return logMessageToServer();
     }
 
-    function createMessage(severity, category, caption, description, parameters, details, exception, methodSourceInfo){
-        sequenceNumber++;
+    function localStorageSupported() {
+      try {
+        return 'localStorage' in window && window['localStorage'] !== null;
+      } catch (e) {
+        return false;
+      }
+    }
+    
+    function sessionStorageSupported(){
+        try{
+            return 'sessionStorage' in window && window['sessionStorage'] != null;
+        } catch(e){
+            return false;
+        }
+    }
+
+    function setUpSequenceNumber(){
+        var sequence = getSequenceNumber();
+        
+        if(sequence === -1 && sessionStorageAvailable){
+            // unable to get a sequence number
+            sequenceNumber = 0;
+        } else {
+            sequenceNumber = sequence;
+        }
+    }
+
+    function getNextSequenceNumber(){
+        var storedSequenceNumber;
+        
+        if(sessionStorageAvailable){
+            // try and get sequence number from session storage
+            storedSequenceNumber = getSequenceNumber();
+            
+            if(storedSequenceNumber < sequenceNumber){
+                // seems we must have had a problem storing a number
+                // previously, so replace value we just read with
+                // the one we are holding in memory
+                storedSequenceNumber = sequenceNumber;
+            }
+            
+            // if we've got the sequence number increment it and store it
+            if(storedSequenceNumber != -1){
+                storedSequenceNumber++;
+                if(setSequenceNumber(storedSequenceNumber)){
+                    sequenceNumber = storedSequenceNumber;
+                    return sequenceNumber;
+                }
+            }
+        }
+        
+        sequenceNumber++;        
+        return sequenceNumber;
+    }
+
+    function getSequenceNumber(){
+        if(sessionStorageAvailable){
+            try {
+                var currentNumber = sessionStorage.getItem("LoupeSequenceNumber");
+                if(currentNumber){
+                    return parseInt(currentNumber);
+                } else {
+                    return 0;
+                }
+            } catch (e) {
+                consoleLog("Unable to retrieve sequence number from session storage. " + e.message);
+            } 
+        }
+        // we return -1 to indicate cannot get sequence number
+        // or that sessionStorage isn't available
+        return -1;
+    }
+
+    function setSequenceNumber(sequenceNumber){
+        try {
+            sessionStorage.setItem("LoupeSequenceNumber", sequenceNumber);
+            return true;
+        } catch (e){
+            consoleLog("Unable to store sequence number");
+            return false;
+        }
+    }
+
+    function createMessage(severity, category, caption, description, parameters, exception, details, methodSourceInfo){
+        var messageSequenceNumber = getNextSequenceNumber();
+        
+        var timeStamp = createTimeStamp();
+        
         var message = {
           severity: severity,
           category: category,
@@ -223,11 +319,21 @@
           details: details,
           exception: exception,
           methodSourceInfo: null,
-          timeStamp: createTimeStamp(),
-          sequence: sequenceNumber
+          timeStamp: timeStamp,
+          sequence: messageSequenceNumber
         };
         
-        return message;        
+        if(localStorageAvailable) {
+            try{
+                localStorage.setItem("Loupe" + timeStamp,JSON.stringify(message));
+            } catch (e){
+                messageStorage.push(message);
+                consoleLog("Error attempting to store Loupe log message in local storage. " + e.message);
+                console.dir(e);
+            }
+        } else {
+            messageStorage.push(message);
+        }       
     }
 
     function createTimeStamp() {
@@ -246,26 +352,59 @@
             + ':' + pad(now.getSeconds()) 
             + dif + pad(tzo / 60) 
             + ':' + pad(tzo % 60);
-    }    
+    } 
 
-    function logMessageToServer(message) {
-        var logMessage = {
-            session: {
-               client: getPlatform()
-            },
-            logMessages: [message]
-        };
-         
-         if(sessionId){
-             logMessage.session.sessionId = sessionId;
-         }
-         
-        sendMessage(logMessage);
+    function getMessagesToSend(){
+        var messages=[];
         
-        return true;
+        if(messageStorage.length){
+            messages = messageStorage.slice();
+            messageStorage.length = 0;
+        } 
+        
+        if(localStorageAvailable){
+            var keys =[];
+            
+    		for(var i=0; i < localStorage.length; i++){
+    			if(localStorage.key(i).indexOf('Loupe') > -1){
+                    keys.push(localStorage.key(i));
+    				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
+    			}
+    		}
+           
+    		for(var i=0; i < keys.length; i++){
+    		  try {
+                  localStorage.removeItem(localStorage.key(i));	
+              } catch (e) {
+                  consoleLog("Unable to remove message from localStorage: " + e.message);
+                  console.dir(e);
+              }
+            }
+        }
+        
+        return messages;
     }
 
-    function sendMessage(logMessage){
+    function logMessageToServer() {
+        var messages = getMessagesToSend();
+        
+        if(messages.length) {
+            var logMessage = {
+                session: {
+                   client: getPlatform()
+                },
+                logMessages: messages
+            };
+             
+             if(sessionId){
+                 logMessage.session.sessionId = sessionId;
+             }
+             
+            sendMessageToServer(logMessage);            
+        }
+    }
+
+    function sendMessageToServer(logMessage){
         try {
             if (typeof (XMLHttpRequest) === "undefined") {
                 console.log("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");

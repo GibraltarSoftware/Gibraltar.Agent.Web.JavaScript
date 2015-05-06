@@ -1,17 +1,15 @@
-﻿(function (gibraltar, window) {
+﻿(function (loupe, window) {
 
     var existingOnError = window.onerror;
     var stackTrace;
     var clientPlatform;
     var propagateError = false;
-
-    var targets = {
-        base: "/Gibraltar/Log/",
-        general: "Message",
-        exception: "Exception"
-    };
-
-    gibraltar.logMessageSeverity = {
+    var sequenceNumber = 0;
+    var sessionId;
+    var messageStorage = [];
+    
+    
+    loupe.logMessageSeverity = {
         none: 0,
         critical: 1,
         error: 2,
@@ -24,19 +22,60 @@
 
     setUpOnError(window);
 
-    gibraltar.agent = {
-        log: log,
+    var verbose = partial(write, loupe.logMessageSeverity.verbose);
+    var information = partial(write, loupe.logMessageSeverity.information);
+    var warning = partial(write, loupe.logMessageSeverity.warning);
+    var error = partial(write, loupe.logMessageSeverity.error);
+    var critical = partial(write, loupe.logMessageSeverity.critical);
+
+    // check for unsent messages on start up
+    setTimeout(logMessageToServer,10);
+
+    loupe.agent = {
+        verbose: verbose,
+        information: information,
+        warning: warning,
+        error: error,
+        critical: critical,
+        write: write,
+        setSessionId: setSessionId,
         propagateOnError: propagateError
     };
 
-    return gibraltar.agent;
+    return loupe.agent;
 
+    function setSessionId(value){
+        sessionId = value;
+    }
 
-    function log(severity, category, caption, description, parameters, details) {
+    function partial(fn /*, args...*/) {
+      // A reference to the Array#slice method.
+      var slice = Array.prototype.slice;
+      // Convert arguments object to an array, removing the first argument.
+      var args = slice.call(arguments, 1);
+    
+      return function() {
+        // Invoke the originally-specified function, passing in all originally-
+        // specified arguments, followed by any just-specified arguments.
+        return fn.apply(this, args.concat(slice.call(arguments, 0)));
+      };
+    }
 
-        var target = targetUrl(targets.general);
+    function sanitiseArgument(parameter){
+        if (typeof parameter == 'undefined'){
+            return null;
+        }
+        
+        return  parameter;
+    }
 
-        setTimeout(logMessage, 10, severity, category, caption, description, parameters, details, target);
+    function write(severity, category, caption, description, parameters, exception, details) {        
+        exception = sanitiseArgument(exception);
+        details = sanitiseArgument(details);
+        
+        createMessage(severity,category, caption, description, parameters, exception, details, null);
+        
+        setTimeout(logMessageToServer, 10);
     }
 
     function createHelpers() {
@@ -77,7 +116,7 @@
             // us to return false but logically we want to state we
             // want to propagate i.e. true, so we reverse the bool
             // so users can set as they expect not how browser expects
-            return !gibraltar.agent.propagateOnError;
+            return !loupe.agent.propagateOnError;
         };
 
     }
@@ -162,71 +201,148 @@
     }
 
     function logError(msg, url, line, column, error) {
-        var target = targetUrl(targets.exception);
 
-        var errorDetails = {
-            Category: "JavaScript",
-            Message: msg,
-            Url: url,
-            StackTrace: getStackTrace(error, msg),
-            Cause: "",
-            Line: line,
-            Column: column,
-            Details: ""
+        var exception = {
+            message: msg,
+            url: url,
+            stackTrace: getStackTrace(error, msg),
+            cause: "",
+            line: line,
+            column: column            
         };
 
-        errorDetails.Details = JSON.stringify({ Client: getPlatform() });
+        var message = createMessage(loupe.logMessageSeverity.error,"JavaScript","","",null,exception,null,null);
 
-        return sendLog(target, errorDetails);
+        return logMessageToServer(message);
     }
 
-    function logMessage(severity, category, caption, description, parameters, details, target) {
-        var logDetails = {
-            Severity: severity,
-            Category: category,
-            Caption: caption,
-            Description: description,
-            Parameters: parameters,
-            Details: JSON.stringify(details)
+    function localStorageSupported() {
+      try {
+        return 'localStorage' in window && window['localStorage'] !== null;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function createMessage(severity, category, caption, description, parameters, exception, details, methodSourceInfo){
+        sequenceNumber++;
+        
+        var timeStamp = createTimeStamp();
+        
+        var message = {
+          severity: severity,
+          category: category,
+          caption: caption,
+          description: description,
+          parameters: parameters,
+          details: details,
+          exception: exception,
+          methodSourceInfo: null,
+          timeStamp: timeStamp,
+          sequence: sequenceNumber
         };
-
-        sendLog(target, logDetails);
+        
+        if(localStorageSupported()){
+            localStorage.setItem("Loupe" + timeStamp,JSON.stringify(message));
+        } else {
+            messageStorage.push(message);
+        }       
     }
 
-    function targetUrl(endpoint) {
-        return window.location.origin + targets.base + endpoint;
+    function createTimeStamp() {
+        var now = new Date(),
+            tzo = -now.getTimezoneOffset(),
+            dif = tzo >= 0 ? '+' : '-',
+            pad = function(num) {
+                var norm = Math.abs(Math.floor(num));
+                return (norm < 10 ? '0' : '') + norm;
+            };
+        return now.getFullYear() 
+            + '-' + pad(now.getMonth()+1)
+            + '-' + pad(now.getDate())
+            + 'T' + pad(now.getHours())
+            + ':' + pad(now.getMinutes()) 
+            + ':' + pad(now.getSeconds()) 
+            + dif + pad(tzo / 60) 
+            + ':' + pad(tzo % 60);
+    } 
+
+    function getMessagesToSend(){
+        var messages=[];
+        
+        if(messageStorage.length){
+            messages = messageStorage.slice();
+            messageStorage.length = 0;
+        } else {
+            var keys =[];
+            
+    		for(var i=0; i < localStorage.length; i++){
+    			if(localStorage.key(i).indexOf('Loupe') > -1){
+                    keys.push(localStorage.key(i));
+    				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
+    			}
+    		}
+           
+    		for(var i=0; i < keys.length; i++){
+    		  try {
+                  localStorage.removeItem(localStorage.key(i));	
+              } catch (error) {
+                  consoleLog("Unable to remove message from localStorage: " + error);
+              }
+            }
+        }
+        
+        return messages;
     }
 
-    function sendLog(target, errorDetails) {
+    function logMessageToServer() {
+        var messages = getMessagesToSend();
+        
+        if(messages.length) {
+            var logMessage = {
+                session: {
+                   client: getPlatform()
+                },
+                logMessages: messages
+            };
+             
+             if(sessionId){
+                 logMessage.session.sessionId = sessionId;
+             }
+             
+            sendMessage(logMessage);            
+        }
+    }
+
+    function sendMessage(logMessage){
         try {
             if (typeof (XMLHttpRequest) === "undefined") {
-                console.log("Gibraltar Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
+                console.log("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
                 return false;
             }
 
-            consoleLog(errorDetails);
+            consoleLog(logMessage);
 
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     // finished loading
                     if (xhr.status < 200 || xhr.status > 206) {
-                        console.log("Loupe JavaScript Logger: Failed to log to " + target);
+                        console.log("Loupe JavaScript Logger: Failed to log to " + window.location.origin + '/loupe/log');
                         console.log("  Status: " + xhr.status + ": " + xhr.statusText);
                     }
                 }
             };
-            xhr.open("POST", target);
+            xhr.open("POST", window.location.origin + '/loupe/log');
             xhr.setRequestHeader("Content-type", "application/json");
-            xhr.send(JSON.stringify(errorDetails));
+            xhr.send(JSON.stringify(logMessage));
 
         } catch (e) {
-            consoleLog("Gibraltar Loupe JavaScript Logger: Exception while attempting to log to " + target);
+            consoleLog("Loupe JavaScript Logger: Exception while attempting to log to " + target);
             console.dir(e);
             return false;
         }
-
-        return true;
+        
     }
 
     function consoleLog(msg) {
@@ -1777,5 +1893,5 @@
         
     }
 
-})(window.gibraltar = window.gibraltar || {}, window);
+})(window.loupe = window.loupe || {}, window);
 
