@@ -1,30 +1,19 @@
 ﻿xdescribe('When route details in exception', function () {
-
-    var expectedUrl = '/Loupe/Log';
-
     var $scope, ctrl, logService;
+    var common = testCommon();
 
-    beforeEach(function () {
-
-        module(function ($provide) {
-            $provide.factory('$location', function() {
-                return {
-                    absUrl: function() { return '/' }
-                }
-            });
-        });
-
-        module('testApp', function ($exceptionHandlerProvider) {
-            $exceptionHandlerProvider.mode('log');
-        });
+    beforeAll(function(){
+       module(function($provide){
+          $provide.factory('$location',function(){
+             return {
+                  absUrl: function() { return '/'; }
+             };
+          });
+       });
     });
 
-    beforeEach(inject(["loupe.logService", function (_logService_) {
-        logService = _logService_;
-    }]));
-
-
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler, $route, $location) {
+        logService = common.logService();
         $scope = $rootScope.$new();
 
         $location.absUrl('/');
@@ -42,54 +31,43 @@
         });
     }));
 
-    afterEach(inject(function ($httpBackend) {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-    }));
+    it('Should have correct Route Url', function () {
+        common.executeTest(ctrl.throwSimpleError(),
+                           function (requestBody) {
+                                var data = JSON.parse(requestBody);
+                                var details = JSON.parse(data.logMessages[0].details);
+                                expect(details.Page.RouteUrl).toBe('/');
+                                return true;
+                            });
+    });
 
+    it('Should have empty route name', function() {
+        common.executeTest(ctrl.throwSimpleError(),
+                           function (requestBody) {
+                                var data = JSON.parse(requestBody);
+                                var details = JSON.parse(data.logMessages[0].details);
+                                expect(details.Page.RouteName).toBe("");
+                                return true;
+                            });
+    });
 
+    it('Should have templateUrl', function () {
+        common.executeTest(ctrl.throwSimpleError(),
+                           function (requestBody) {
+                                var data = JSON.parse(requestBody);
+                                var details = JSON.parse(data.logMessages[0].details);
+                                expect(details.Page.TemplateUrl).toBe("/");
+                                return true;
+                            });
+    });
 
-    it('Should have correct Route Url', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-            var details = JSON.parse(data.Details);
-            expect(details.Page.RouteUrl).toBe('/');
-            return true;
-        }).respond(200);
-        ctrl.throwSimpleError();
-        $httpBackend.flush();
-    }));
-
-    it('Should have empty route name', inject(function($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-            var details = JSON.parse(data.Details);
-            expect(details.Page.RouteName).toBe("");
-            return true;
-        }).respond(200);
-        ctrl.throwSimpleError();
-        $httpBackend.flush();
-    }));
-
-    it('Should have templateUrl', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-            var details = JSON.parse(data.Details);
-            expect(details.Page.TemplateUrl).toBe("/");
-            return true;
-        }).respond(200);
-        ctrl.throwSimpleError();
-        $httpBackend.flush();
-    }));
-
-    it('Should have empty parameters', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-            var details = JSON.parse(data.Details);
-            expect(details.Page.Parameters).toEqual([]);
-            return true;
-        }).respond(200);
-        ctrl.throwSimpleError();
-        $httpBackend.flush();
-    }));
+    it('Should have empty parameters', function () {
+        common.executeTest(ctrl.throwSimpleError(),
+                           function (requestBody) {
+                                var data = JSON.parse(requestBody);
+                                var details = JSON.parse(data.Details);
+                                expect(details.Page.Parameters).toEqual([]);
+                                return true;
+                            });
+    });
 });

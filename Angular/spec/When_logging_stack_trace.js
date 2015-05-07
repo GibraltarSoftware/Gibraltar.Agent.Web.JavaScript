@@ -1,21 +1,12 @@
 ﻿describe("When logging stack trace", function() {
     var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService, clientDetails;
+    var common = testCommon('testErrorApp');
+
 
     beforeAll(function () {
         BrowserDetect.init();
     });
-
-    beforeEach(function () {
-        module('testErrorApp', function ($exceptionHandlerProvider) {
-            $exceptionHandlerProvider.mode('log');
-        });
-    });
-
-    beforeEach(inject(["loupe.logService", function (_logService_) {
-        logService = _logService_;
-    }]));
-
 
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler) {
         $scope = $rootScope.$new();
@@ -26,30 +17,23 @@
             logService: logService
         });
     }));
- 
-    afterEach(inject(function ($httpBackend) {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-    }));
 
 
-    it('Should have expected stack trace for simple error', inject(function($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
+    it('Should have expected stack trace for simple error', function() {
+        common.executeTest(ctrl.throwSimpleError(),
+                           function (requestBody) {
+                                var data = JSON.parse(requestBody);
+                    
+                                var expectedFrames = ['{anonymous}("Throw with message")'];
+                                expect(data.logMessages[0].exception.message).toEqual('Throw with message');
+                                expect(hasExpectedStack(data.logMessages[0].exception.stackTrace, expectedFrames)).toBe(true, "Expected frames do not match");
+                                expect(data.logMessages[0].exception.stackTrace.some(hasLoupeFrame)).toBe(false, "Loupe frames found in stack");
+                    
+                                return true;
+                            });
+    });
 
-            var expectedFrames = ['{anonymous}("Throw with message")'];
-            expect(data.Message).toEqual('Throw with message');
-            expect(hasExpectedStack(data.StackTrace, expectedFrames)).toBe(true);
-            expect(data.StackTrace.some(hasLoupeFrame)).toBe(false);
-
-            return true;
-        }).respond(200);
-
-        ctrl.throwSimpleError();
-        $httpBackend.flush();
-    }));
-
-    it('Should have expected stack trace for custom error details', inject(function ($httpBackend) {
+    it('Should have expected stack trace for custom error details', function() {
         var expectedFrames;
 
         switch (BrowserDetect.browser) {
@@ -66,23 +50,21 @@
                 expectedFrames = ["InnerItem.throwCustomError", "TestingStack.createCustomError", "throwCustomError"];
                 break;
         }
+        
+        common.executeTest(ctrl.throwCustomError(),
+                           function (requestBody) {
+                                var data = JSON.parse(requestBody);
+                                var exception = data.logMessages[0].exception;
+                    
+                                expect(exception.message).toEqual("Error: My custom error");
+                                expect(hasExpectedStackFrames(exception.stackTrace, expectedFrames)).toBe(true, "Expected frames do not match");
+                                expect(exception.stackTrace.some(hasLoupeFrame)).toBe(false, "Loupe frames found in stack");
+                    
+                                return true;
+                           });
+    });
 
-
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-
-            expect(data.Message).toEqual("Error: My custom error");
-            expect(hasExpectedStackFrames(data.StackTrace, expectedFrames)).toBe(true);
-            expect(data.StackTrace.some(hasLoupeFrame)).toBe(false);
-
-            return true;
-        }).respond(200);
-
-        ctrl.throwCustomError();
-        $httpBackend.flush();
-    }));
-
-    it('Should have expected stack trace for Unitialized error', inject(function ($httpBackend) {
+    it('Should have expected stack trace for Unitialized error', function() {
 
         var expectedFrames;
         var expectedMessage;
@@ -107,18 +89,18 @@
                 break;
         }
 
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-            expect(data.Message).toEqual(expectedMessage);
-            expect(hasExpectedStackFrames(data.StackTrace, expectedFrames)).toBe(true);
-            expect(data.StackTrace.some(hasLoupeFrame)).toBe(false);
-
-            return true;
-        }).respond(200);
-
-        ctrl.throwUninitializeError();
-        $httpBackend.flush();
-    }));
+        common.executeTest(ctrl.throwUninitializeError(),
+                           function (requestBody) {
+                                var data = JSON.parse(requestBody);
+                                var exception = data.logMessages[0].exception;
+                    
+                                expect(exception.message).toEqual(expectedMessage);
+                                expect(hasExpectedStackFrames(exception.stackTrace, expectedFrames)).toBe(true,"Expected frames do not match");
+                                expect(exception.stackTrace.some(hasLoupeFrame)).toBe(false, "Loupe frames found in stack");
+                    
+                                return true;
+                           });
+    });
 
 
      function hasExpectedStackFrames(stack, expectedFrames) {

@@ -1,17 +1,7 @@
 ﻿describe('When logging platform details', function() {
     var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService, clientDetails;
-
-    beforeEach(function () {
-        module('testApp', function ($exceptionHandlerProvider) {
-            $exceptionHandlerProvider.mode('log');
-        });
-    });
-
-    beforeEach(inject(["loupe.logService", function (_logService_) {
-        logService = _logService_;
-    }]));
-
+    var common = testCommon();
 
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler) {
         $scope = $rootScope.$new();
@@ -24,18 +14,12 @@
     }));
 
     beforeEach(inject(function($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function(requestBody) {
+        common.executeTest(ctrl.throwSimpleError(),
+        function(requestBody) {
             var data = JSON.parse(requestBody);
             clientDetails = data.session.client;
             return true;
-        }).respond(200);
-        ctrl.throwSimpleError();
-        $httpBackend.flush();
-    }));
-
-    afterEach(inject(function ($httpBackend) {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
+        });
     }));
 
 

@@ -39,7 +39,7 @@ describe('When logging using error method', function () {
             var body = messageFn.getRequestBody();
 
             expect(body.logMessages[0].exception).not.toBeNull();
-            
+            expect(body.logMessages[0].exception.message).toEqual('Custom error');            
             done();       
         });
 

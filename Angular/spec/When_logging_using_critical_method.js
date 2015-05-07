@@ -1,70 +1,56 @@
 describe('When logging using critical method', function() {
-    var expectedUrl = '/Loupe/Log';
+    var common = testCommon();
     var $scope, ctrl, logService;
-    
-    beforeEach(module('testApp', function ($exceptionHandlerProvider) {
-        $exceptionHandlerProvider.mode('log');
-    }));
-    
-    beforeEach(inject(["loupe.logService", function (_logService_) {
-        logService = _logService_;
-    }]));
 
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler) {
+        logService = common.logService();
         $scope = $rootScope.$new();
         ctrl = $controller('TestCtrl', {
             $scope: $scope,
             $exceptionHandler: $exceptionHandler,
             logService: logService
         });
-    }));
-
-    afterEach(inject(function ($httpBackend) {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-    }));    
+    }));        
     
-    it('Should log expected caption & description', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody).logMessages[0];
-            
-            expect(data.category).toEqual('test');
-            expect(data.caption).toEqual('information logging');
-            expect(data.description).toEqual('testing logging using information method');
-            expect(data.severity).toEqual(logService.logMessageSeverity.critical);
-            
-            return true;
-        }).respond(200);
-
-        $scope.critical('information logging','testing logging using information method');
-        $httpBackend.flush();
-    }));
+    it('Should log expected caption & description',function () {
+        common.executeTest($scope.critical('critical logging','testing logging using critical method'),
+                    function(requestBody) {
+                        var data = JSON.parse(requestBody).logMessages[0];
+                        
+                        expect(data.category).toEqual('test');
+                        expect(data.caption).toEqual('critical logging');
+                        expect(data.description).toEqual('testing logging using critical method');
+                        expect(data.severity).toEqual(logService.logMessageSeverity.critical);
+                        
+                        return true;          
+                   });                
+    });
     
-    it('Should log expected exception', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody).logMessages[0];
-            
-            expect(data.exception).not.toBeNull();
-            expect(data.exception.message).toEqual('supplied exception');
-            return true;
-        }).respond(200);
-
+    it('Should log expected exception', function () {
         var suppliedException = new Error("supplied exception");
-        $scope.critical('information logging','testing logging using information method',suppliedException);
-        $httpBackend.flush();
-    }));
+        
+        common.executeTest($scope.critical('critical logging','testing logging using critical method',suppliedException),
+                    function(requestBody) {
+                        var data = JSON.parse(requestBody).logMessages[0];
+                        
+                        expect(data.exception).not.toBeNull();
+                        expect(data.exception.message).toEqual('supplied exception');
+                        return true;               
+                   });        
+    });
     
-    it('Should log expected details', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody).logMessages[0];
-            
-            expect(data.details).toEqual("<data>details</data>");
-            expect(data.severity).toEqual(logService.logMessageSeverity.critical);
-            
-            return true;
-        }).respond(200);
 
-        $scope.critical('information logging','testing logging using information method',null,"<data>details</data>");
-        $httpBackend.flush();
-    }));            
+    
+    it('Should log expected details', function (){
+        common.executeTest($scope.critical('critical logging','testing logging using critical method',null,"<data>details</data>"),
+                    function(requestBody) {
+                        var data = JSON.parse(requestBody).logMessages[0];
+                        
+                        expect(data.details).toEqual("<data>details</data>");
+                        expect(data.severity).toEqual(logService.logMessageSeverity.critical);
+                        
+                        return true;                
+                   });
+    });             
+    
 });

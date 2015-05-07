@@ -1,17 +1,10 @@
 ﻿describe('When logging a message', function() {
-    var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService;
     var sessionId = "angular-session-abc-123";
-
-    beforeEach(module('testApp', function ($exceptionHandlerProvider) {
-        $exceptionHandlerProvider.mode('log');
-    }));
-
-    beforeEach(inject(["loupe.logService", function (_logService_) {
-        logService = _logService_;
-    }]));
+    var common = testCommon();
 
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler) {
+        logService = common.logService();
         $scope = $rootScope.$new();
         ctrl = $controller('TestCtrl', {
             $scope: $scope,
@@ -20,111 +13,91 @@
         });
     }));
 
-    afterEach(inject(function ($httpBackend) {
-        $httpBackend.verifyNoOutstandingExpectation();
-        $httpBackend.verifyNoOutstandingRequest();
-    }));
+    it('Should POST to expected url',function() {
+        common.executeTest($scope.logMessage(),
+                           function(requestBody){
+                                expect(requestBody).not.toEqual("");
+                                return true;                               
+                           });
+    });
 
-    it('Should POST to expected url', inject(function($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function(requestBody) {
-            expect(requestBody).not.toEqual("");
-            return true;
-        }).respond(200);
-        $scope.logMessage();
-        $httpBackend.flush();
-    }));
+    it('Should have correct severity',function () {
+        common.executeTest($scope.logMessage(),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data.logMessages[0].severity).toEqual(logService.logMessageSeverity.information);
+                                return true;                          
+                           });
+    });
 
-    it('Should have correct severity', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
+    it('Should have correct category', function () {
+        common.executeTest($scope.logMessage(),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data.logMessages[0].category).toEqual("test");
+                                return true;                             
+                           });
+    });
 
-            expect(data.logMessages[0].severity).toEqual(logService.logMessageSeverity.information);
-            return true;
-        }).respond(200);
+    it('Should have expected message', function () {
+        common.executeTest($scope.logMessage("Test expected message"),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data.logMessages[0].caption).toEqual("Test expected message");
+                                return true;                            
+                           });
+    });
 
-        $scope.logMessage();
-        $httpBackend.flush();
-    }));
+    it('Should have expected message structure', function () {
+        common.executeTest($scope.logMessage("Test expected message"),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data['session']).toBeDefined('session missing');
+                                var session = data.session;
+                                expect(session['client']).toBeDefined('client details missing');
+                                checkClientMessageStructure(session.client);
+                                
+                                expect(data['logMessages']).toBeDefined('log messages missing');
+                                checkMessageStructure(data.logMessages[0]);
+                                
+                                return true;                          
+                           });
+    });
 
-    it('Should have correct category', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
+    it('Should have time stamp', function () {
+        common.executeTest($scope.logMessage("Test expected message"),
+                           function(requestBody){
+                                var partialTimeStamp = createTimeStamp();
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data.logMessages[0].timeStamp).toContain(partialTimeStamp);
+                                return true;                            
+                           });
+    });
 
-            expect(data.logMessages[0].category).toEqual("test");
-            return true;
-        }).respond(200);
+    it('Should have sequence number', function () {
+        common.executeTest($scope.logMessage("Test expected message"),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data.logMessages[0].sequence).not.toBeNull();
+                                return true;                             
+                           });
+    });
 
-        $scope.logMessage();
-        $httpBackend.flush();
-    }));
-
-    it('Should have expected message', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-
-            expect(data.logMessages[0].caption).toEqual("Test expected message");
-            return true;
-        }).respond(200);
-
-        $scope.logMessage("Test expected message");
-        $httpBackend.flush();
-    }));
-
-    it('Should have expected message structure', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-
-            expect(data['session']).toBeDefined('session missing');
-            var session = data.session;
-            expect(session['client']).toBeDefined('client details missing');
-            checkClientMessageStructure(session.client);
-            
-            expect(data['logMessages']).toBeDefined('log messages missing');
-            checkMessageStructure(data.logMessages[0]);
-            
-            return true;
-        }).respond(200);
-
-        $scope.logMessage("Test expected message");
-        $httpBackend.flush();
-    }));
-
-    it('Should have time stamp', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var partialTimeStamp = createTimeStamp();
-            var data = JSON.parse(requestBody);
-
-            expect(data.logMessages[0].timeStamp).toContain(partialTimeStamp);
-            return true;
-        }).respond(200);
-
-        $scope.logMessage("Test expected message");
-        $httpBackend.flush();
-    }));
-
-    it('Should have sequence number', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-
-            expect(data.logMessages[0].sequence).not.toBeNull();
-            return true;
-        }).respond(200);
-
-        $scope.logMessage("Test expected message");
-        $httpBackend.flush();
-    }));
-
-    it('Should have session Id assigned to it', inject(function ($httpBackend) {
-        $httpBackend.expectPOST(expectedUrl, function (requestBody) {
-            var data = JSON.parse(requestBody);
-
-            expect(data.session.sessionId).toEqual(sessionId);
-            return true;
-        }).respond(200);
-
+    it('Should have session Id assigned to it', function () {
         logService.setSessionId(sessionId);
-        $scope.logMessage("Test expected message");
-        $httpBackend.flush();
-    }));    
+        common.executeTest($scope.logMessage("Test expected message"),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data.session.sessionId).toEqual(sessionId);
+                                return true;                            
+                           });
+    });    
 
 });

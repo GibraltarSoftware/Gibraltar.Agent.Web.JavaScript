@@ -310,6 +310,10 @@
         
         var timeStamp = createTimeStamp();
         
+       if(exception){
+        exception = createExceptionFromError(exception);
+       }
+        
         var message = {
           severity: severity,
           category: category,
@@ -335,6 +339,25 @@
             messageStorage.push(message);
         }       
     }
+
+        function createExceptionFromError(error, cause){
+            
+            // if the object has an Url property
+            // its one of our exception objects so just
+            // return it
+            if("url" in error){
+                return error;
+            }
+            
+            return {
+                    message: error.message,
+                    url: window.location.href,
+                    stackTrace: error.stackTrace,
+                    cause: cause || "",
+                    line: error.lineNumber,
+                    column: error.columnNumber,                        
+                };            
+        }
 
     function createTimeStamp() {
         var now = new Date(),

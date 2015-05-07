@@ -1,12 +1,14 @@
 ﻿angular.module("Loupe.Agent.Angular", [])
-    .factory("loupe.logService", ["$log", "$window", "$injector", "loupe.stacktraceService", "loupe.platformService",
+    .factory("loupe.logService", ["$log", "$window", "$injector", "loupe.stacktraceService", "loupe.platformService", 
     function ($log, $window, $injector, stacktraceService, platformService) {
         // The error log service logs angular errors to the server
         // This is called from the existing Angular exception handler, as setup by a decorator
        
-        
-        var sequenceNumber = 0;
+        var sequenceNumber;
         var sessionId;
+        var messageStorage = [];
+        var localStorageAvailable = localStorageSupported();
+        var sessionStorageAvailable = sessionStorageSupported();
         
         var logMessageSeverity = {
             none: 0,
@@ -16,6 +18,8 @@
             information: 8,
             verbose: 16,
         };
+
+        setUpSequenceNumber();
 
         var verbose = partial(write, logMessageSeverity.verbose);
         var information = partial(write, logMessageSeverity.information);
@@ -38,7 +42,6 @@
         return  logService;
 
 
-
         function partial(fn /*, args...*/) {
           // A reference to the Array#slice method.
           var slice = Array.prototype.slice;
@@ -52,7 +55,88 @@
           };
         }
         
+        function localStorageSupported() {
+            try {
+                return 'localStorage' in window && window['localStorage'] !== null;
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        function sessionStorageSupported(){
+            try{
+                return 'sessionStorage' in window && window['sessionStorage'] != null;
+            } catch(e){
+                return false;
+            }
+        }
 
+        function setUpSequenceNumber(){
+            var sequence = getSequenceNumber();
+            
+            if(sequence === -1 && sessionStorageAvailable){
+                // unable to get a sequence number
+                sequenceNumber = 0;
+            } else {
+                sequenceNumber = sequence;
+            }
+        }
+
+        function getNextSequenceNumber(){
+            var storedSequenceNumber;
+            
+            if(sessionStorageAvailable){
+                // try and get sequence number from session storage
+                storedSequenceNumber = getSequenceNumber();
+                
+                if(storedSequenceNumber < sequenceNumber){
+                    // seems we must have had a problem storing a number
+                    // previously, so replace value we just read with
+                    // the one we are holding in memory
+                    storedSequenceNumber = sequenceNumber;
+                }
+                
+                // if we've got the sequence number increment it and store it
+                if(storedSequenceNumber != -1){
+                    storedSequenceNumber++;
+                    if(setSequenceNumber(storedSequenceNumber)){
+                        sequenceNumber = storedSequenceNumber;
+                        return sequenceNumber;
+                    }
+                }
+            }
+            
+            sequenceNumber++;        
+            return sequenceNumber;
+        }
+
+        function getSequenceNumber(){
+            if(sessionStorageAvailable){
+                try {
+                    var currentNumber = sessionStorage.getItem("LoupeSequenceNumber");
+                    if(currentNumber){
+                        return parseInt(currentNumber);
+                    } else {
+                        return 0;
+                    }
+                } catch (e) {
+                    $log.log("Unable to retrieve sequence number from session storage. " + e.message);
+                } 
+            }
+            // we return -1 to indicate cannot get sequence number
+            // or that sessionStorage isn't available
+            return -1;
+        }
+
+        function setSequenceNumber(sequenceNumber){
+            try {
+                sessionStorage.setItem("LoupeSequenceNumber", sequenceNumber);
+                return true;
+            } catch (e){
+                $log.log("Unable to store sequence number. " + e.message);
+                return false;
+            }
+        }        
         
         function getRoute() {
             // get the data from standard angular route provider
@@ -136,28 +220,31 @@
                 return stacktraceService.print({ e: exception, guess: true });
             } catch (e) {
                 // deliberately swallow; some browsers don't expose the stack property on the exception
-                console.log(e);
+                 $log.log(e);
             }
             return null;
         }
 
-        function logMessageToServer(message) {
+        function logMessageToServer() {
+            var messages = getMessagesToSend();
             
-            var logMessage = {
-                session: {
-                   client: platformService.platform()
-                },
-                logMessages: [message]
-            };              
-            
-            if(sessionId){
-                logMessage.session.sessionId = sessionId;
+            if(messages.length) {
+                var logMessage = {
+                    session: {
+                       client: platformService.platform()
+                    },
+                    logMessages: messages
+                };
+                 
+                 if(sessionId){
+                     logMessage.session.sessionId = sessionId;
+                 }
+                 
+                sendMessageToServer(logMessage);            
             }
-            
-            sendMessage(logMessage);
         }
 
-        function sendMessage(logMessage){
+        function sendMessageToServer(logMessage){
             var http = $injector.get("$http");
             http.post("/Loupe/Log", angular.toJson(logMessage))
                 .error(function logMessageError(data, status, headers, config) {
@@ -203,9 +290,9 @@
                     column: null,                        
                 };
 
-                var message = createMessage(logMessageSeverity.error,"JavaScript","","",null,null,loupeException,null);
+                createMessage(logMessageSeverity.error,"JavaScript","","",null,null,loupeException,null);
 
-                logMessageToServer(message);
+                logMessageToServer();
 
             } catch (loggingError) {
                 // For developers - log the log-failure.
@@ -215,8 +302,14 @@
         }
 
         function createMessage(severity, category, caption, description, parameters, details, exception, methodSourceInfo){
-            sequenceNumber++;
+            var messageSequenceNumber = getNextSequenceNumber();
             
+            var timeStamp = createTimeStamp();
+
+            if(exception){
+                exception = createExceptionFromError(exception);
+            }
+                    
             var message = {
               severity: severity,
               category: category,
@@ -226,11 +319,39 @@
               details: details,
               exception: exception,
               methodSourceInfo: null,
-              timeStamp: createTimeStamp(),
-              sequence: sequenceNumber
+              timeStamp: timeStamp,
+              sequence: messageSequenceNumber
             };
             
-            return message;        
+            if(localStorageAvailable) {
+                try{
+                    localStorage.setItem("Loupe" + timeStamp,JSON.stringify(message));
+                } catch (e){
+                    messageStorage.push(message);
+                     $log.log("Error attempting to store Loupe log message in local storage. " + e.message);
+                }
+            } else {
+                messageStorage.push(message);
+            }        
+        }
+
+        function createExceptionFromError(error, cause){
+            
+            // if the object has an Url property
+            // its one of our exception objects so just
+            // return it
+            if("url" in error){
+                return error;
+            }
+            
+            return {
+                    message: error.message,
+                    url: $window.location.href,
+                    stackTrace: error.stackTrace,
+                    cause: cause || "",
+                    line: error.lineNumber,
+                    column: error.columnNumber,                        
+                };            
         }
 
         function createTimeStamp() {
@@ -251,6 +372,36 @@
                 + ':' + pad(tzo % 60);
         }    
 
+        function getMessagesToSend(){
+            var messages=[];
+            
+            if(messageStorage.length){
+                messages = messageStorage.slice();
+                messageStorage.length = 0;
+            } 
+            
+            if(localStorageAvailable){
+                var keys =[];
+                
+        		for(var i=0; i < localStorage.length; i++){
+        			if(localStorage.key(i).indexOf('Loupe') > -1){
+                        keys.push(localStorage.key(i));
+        				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
+        			}
+        		}
+               
+        		for(var i=0; i < keys.length; i++){
+        		  try {
+                      localStorage.removeItem(localStorage.key(i));	
+                  } catch (e) {
+                      $log.log("Unable to remove message from localStorage: " + e.message);
+                  }
+                }
+            }
+            
+            return messages;
+        }
+
         function sanitiseArgument(parameter){
             if (typeof parameter == 'undefined'){
                 return null;
@@ -263,16 +414,10 @@
             exception = sanitiseArgument(exception);
             details = sanitiseArgument(details);
         
-            var message = createMessage(severity,
-                                        category, 
-                                        caption, 
-                                        description, 
-                                        parameters, 
-                                        details, 
-                                        exception,
-                                        null);
-        
-            logMessageToServer(message);
+            createMessage(severity, category, caption, description, parameters, details, exception, null);
+            
+            var timeout = $injector.get("$timeout");
+            timeout(logMessageToServer, 10);
         }
 
         function setSessionId(value){
