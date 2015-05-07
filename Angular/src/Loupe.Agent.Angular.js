@@ -20,6 +20,7 @@
         };
 
         setUpSequenceNumber();
+        sendAnyExistingMessages();
 
         var verbose = partial(write, logMessageSeverity.verbose);
         var information = partial(write, logMessageSeverity.information);
@@ -69,6 +70,11 @@
             } catch(e){
                 return false;
             }
+        }
+
+        function sendAnyExistingMessages(){
+            // check for unsent messages on start up
+            setTimeout(logMessageToServer,10);        
         }
 
         function setUpSequenceNumber(){
