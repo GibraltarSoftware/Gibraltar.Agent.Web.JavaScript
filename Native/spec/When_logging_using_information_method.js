@@ -1,22 +1,11 @@
 describe('When logging using information methods', function () {
 
-    var xhr, requests;
+    var common = testCommon();
     var messageFn = new Messages();
 
     beforeEach(function () {
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        messageFn.init(requests);
-        xhr.onCreate = function(req) {
-            requests.push(req);
-        };
+        messageFn.init(common.requests());
     });
-
-    afterEach(function() {
-        xhr.restore();
-    });
-	
-    
     
     it('Should log severity level information', function(done) {
         loupe.agent.information('test', 'test logs message','test log description including parameter {0}',['test']);

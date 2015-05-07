@@ -9,6 +9,7 @@
     var messageStorage = [];
     var localStorageAvailable = localStorageSupported();
     var sessionStorageAvailable = sessionStorageSupported();
+    var self = this;
     
     loupe.logMessageSeverity = {
         none: 0,
@@ -340,24 +341,24 @@
         }       
     }
 
-        function createExceptionFromError(error, cause){
-            
-            // if the object has an Url property
-            // its one of our exception objects so just
-            // return it
-            if("url" in error){
-                return error;
-            }
-            
-            return {
-                    message: error.message,
-                    url: window.location.href,
-                    stackTrace: error.stackTrace,
-                    cause: cause || "",
-                    line: error.lineNumber,
-                    column: error.columnNumber,                        
-                };            
+    function createExceptionFromError(error, cause){
+        
+        // if the object has an Url property
+        // its one of our exception objects so just
+        // return it
+        if("url" in error){
+            return error;
         }
+        
+        return {
+                message: error.message,
+                url: window.location.href,
+                stackTrace: error.stackTrace,
+                cause: cause || "",
+                line: error.lineNumber,
+                column: error.columnNumber,                        
+            };            
+    }
 
     function createTimeStamp() {
         var now = new Date(),
@@ -379,6 +380,7 @@
 
     function getMessagesToSend(){
         var messages=[];
+        var keys =[];
         
         if(messageStorage.length){
             messages = messageStorage.slice();
@@ -386,30 +388,32 @@
         } 
         
         if(localStorageAvailable){
-            var keys =[];
-            
     		for(var i=0; i < localStorage.length; i++){
     			if(localStorage.key(i).indexOf('Loupe') > -1){
                     keys.push(localStorage.key(i));
     				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
     			}
     		}
-           
-    		for(var i=0; i < keys.length; i++){
-    		  try {
-                  localStorage.removeItem(localStorage.key(i));	
-              } catch (e) {
-                  consoleLog("Unable to remove message from localStorage: " + e.message);
-                  console.dir(e);
-              }
-            }
         }
         
-        return messages;
+        return [messages, keys];
+    }
+
+    function removeMessagesFromStorage(keys){
+        for(var i=0; i < keys.length; i++){
+          try {
+              localStorage.removeItem(localStorage.key(i));	
+          } catch (e) {
+              consoleLog("Unable to remove message from localStorage: " + e.message);
+              console.dir(e);
+          }
+        }        
     }
 
     function logMessageToServer() {
-        var messages = getMessagesToSend();
+        var messageDetails = getMessagesToSend();        
+        var messages = messageDetails[0];
+        var keys = messageDetails[1];
         
         if(messages.length) {
             var logMessage = {
@@ -423,11 +427,11 @@
                  logMessage.session.sessionId = sessionId;
              }
              
-            sendMessageToServer(logMessage);            
+            sendMessageToServer(logMessage, keys);            
         }
     }
 
-    function sendMessageToServer(logMessage){
+    function sendMessageToServer(logMessage, keys){
         try {
             if (typeof (XMLHttpRequest) === "undefined") {
                 console.log("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
@@ -444,6 +448,12 @@
                         console.log("Loupe JavaScript Logger: Failed to log to " + window.location.origin + '/loupe/log');
                         console.log("  Status: " + xhr.status + ": " + xhr.statusText);
                     }
+                    
+                    // if the call was sucessful and we have keys to items in storage
+                    // now we remove them
+                    if(xhr.status === 200 || xhr.status === 204 && keys.length){
+                        removeMessagesFromStorage(keys);
+                    }
                 }
             };
             xhr.open("POST", window.location.origin + '/loupe/log');
@@ -451,7 +461,7 @@
             xhr.send(JSON.stringify(logMessage));
 
         } catch (e) {
-            consoleLog("Loupe JavaScript Logger: Exception while attempting to log to " + target);
+            consoleLog("Loupe JavaScript Logger: Exception while attempting to log");
             console.dir(e);
             return false;
         }

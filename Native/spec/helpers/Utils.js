@@ -153,7 +153,13 @@ function Messages(){
     };
     
     this.waitToBeLogged = function waitForMessageRecieved(fn){
-        sometimeWhen(function () { return requests.length > 0;}, fn);        
+        sometimeWhen(function () { 
+            if(requests.length){
+                requests[0].respond(204);
+                return true;
+            }
+            return false;
+            }, fn);        
     };   
     
     function sometimeWhen(test, then){

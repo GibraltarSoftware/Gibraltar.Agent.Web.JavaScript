@@ -1,6 +1,6 @@
 ﻿describe('When logging uncaught exception', function() {
 
-    var xhr, requests;
+    var common = testCommon();
     var sessionId = "session-456-def";
     
 	beforeAll(function() {
@@ -8,38 +8,26 @@
     });
 	
     beforeEach(function (done) {
-
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        xhr.onCreate = function (req) {
-            requests.push(req);
-        };
-
         loupe.agent.setSessionId(sessionId);
         createError();
-        requestsComplete(done);
-
-    });
-
-    afterEach(function () {
-        xhr.restore();
+        common.requestComplete(done);
     });
 
     it('Should send to expected URL', function() {
-        expect(requests[0].url).toBe(window.location.origin + '/loupe/log');
+        expect(common.requests()[0].url).toBe(window.location.origin + '/loupe/log');
     });
 
     it('Should POST to server', function() {
-        expect(requests[0].method).toBe('POST');
+        expect(common.requests()[0].method).toBe('POST');
     });
 
     it('Should have expected message', function() {
-        var body = JSON.parse(requests[0].requestBody);
+        var body = common.requestBody();
         expect(body.logMessages[0].exception.message).toMatch(/Test Error/);
     });
 
     it('Should have expected structure', function () {
-        var body = JSON.parse(requests[0].requestBody);     
+        var body = common.requestBody();     
         expect(body.session['client']).toBeDefined();
         
         checkClientMessageStructure(body.session.client);
@@ -61,18 +49,18 @@
     it('Should have timestamp', function(){
         var partialTimeStamp = createTimeStamp();
         
-        var body = JSON.parse(requests[0].requestBody);
+        var body = common.requestBody();
 
         expect(body.logMessages[0].timeStamp).toContain(partialTimeStamp);
     });
     
     it('Should have sequence number', function(){
-        var body = JSON.parse(requests[0].requestBody); 
+        var body = common.requestBody(); 
         expect(body.logMessages[0].sequence).not.toBeNull();
     });
 
     it('Should have client assigned session id', function(){
-        var body = JSON.parse(requests[0].requestBody); 
+        var body = common.requestBody(); 
         expect(body.session.sessionId).toEqual(sessionId);        
     })
 
@@ -84,6 +72,7 @@
 
     function requestsComplete(done) {
         if (requests.length > 0) {
+            requests[0].respond(204);            
             done();
         } else {
             setTimeout(requestsComplete, 10, done);

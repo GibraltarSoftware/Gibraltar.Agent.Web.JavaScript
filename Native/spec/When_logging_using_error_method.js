@@ -1,22 +1,12 @@
 describe('When logging using error method', function () {
 
-    var xhr, requests;
+    var common = testCommon();
     var messageFn = new Messages();
 
     beforeEach(function () {
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        messageFn.init(requests);
-        xhr.onCreate = function(req) {
-            requests.push(req);
-        };
-    });
-
-    afterEach(function() {
-        xhr.restore();
+        messageFn.init(common.requests());
     });
 	
-    
     
     it('Should log severity level error', function(done) {
         loupe.agent.error('test', 'test logs message','test log description including parameter {0}',['test']);

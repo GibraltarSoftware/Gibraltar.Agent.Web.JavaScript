@@ -1,8 +1,10 @@
 ﻿describe('When propagating error', function() {
 
-    var xhr, requests, existingOnError;
+    var common = testCommon();
 
-    beforeEach(function(){
+    var existingOnError;
+
+    beforeAll(function(){
         existingOnError = window.onerror;
         window.postErrorHandlerCalled = false;
         
@@ -17,21 +19,12 @@
     });
 
     beforeEach(function(done) {
-
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        xhr.onCreate = function(req) {
-            requests.push(req);
-        };
-
         loupe.agent.propagateOnError = true;
-        spyOn(console, 'error');
         createSimpleError();
-        requestComplete(done);
+        common.requestComplete(done);
     });
 
     afterEach(function() {
-        xhr.restore();
         window.onerror = existingOnError;
     });
 
@@ -44,14 +37,5 @@
         setTimeout(function() {
             throw "Test Error";
         }, 5);
-
-    }
-
-    function requestComplete(done) {
-        if (requests.length > 0) {
-            done();
-        } else {
-            setTimeout(requestComplete, 10, done);
-        }
     }
 });

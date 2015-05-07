@@ -1,6 +1,6 @@
 ﻿describe('When logging stack trace', function () {
 
-    var xhr, requests, body;
+    var common = testCommon();
     var messageFn = new Messages();
 
     beforeAll(function() {
@@ -8,18 +8,9 @@
     });
 
     beforeEach(function () {
-
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        messageFn.init(requests);
-        xhr.onCreate = function(req) {
-            requests.push(req);
-        };
+        messageFn.init(common.requests());
     });
 
-    afterEach(function() {
-        xhr.restore();
-    });
 
     it('Should have trace for uninitialized Object details', function (done) {
         throwUninitializeError();

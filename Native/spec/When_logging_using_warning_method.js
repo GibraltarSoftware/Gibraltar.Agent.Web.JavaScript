@@ -1,22 +1,10 @@
 describe('When logging using warning methods', function () {
-
-    var xhr, requests;
+    var common = testCommon();
     var messageFn = new Messages();
 
     beforeEach(function () {
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        messageFn.init(requests);
-        xhr.onCreate = function(req) {
-            requests.push(req);
-        };
+        messageFn.init(common.requests());
     });
-
-    afterEach(function() {
-        xhr.restore();
-    });
-	
-    
     
     it('Should log severity level warning', function(done) {
         loupe.agent.warning('test', 'test logs message','test log description including parameter {0}',['test']);

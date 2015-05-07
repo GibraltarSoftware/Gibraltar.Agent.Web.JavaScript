@@ -1,22 +1,11 @@
 describe('When logging using critical method', function () {
 
-    var xhr, requests;
+    var common = testCommon();
     var messageFn = new Messages();
 
     beforeEach(function () {
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        messageFn.init(requests);
-        xhr.onCreate = function(req) {
-            requests.push(req);
-        };
+        messageFn.init(common.requests());
     });
-
-    afterEach(function() {
-        xhr.restore();
-    });
-	
-    
     
     it('Should log severity level critical', function(done) {
         loupe.agent.critical('test', 'test logs message','test log description including parameter {0}',['test']);

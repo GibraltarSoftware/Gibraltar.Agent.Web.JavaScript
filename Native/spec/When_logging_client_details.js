@@ -1,17 +1,13 @@
 ﻿describe('When logging client details', function() {
 
-    var xhr, requests;
     var clientDetails;
+    
+    var common = testCommon();
 
     beforeEach(function(done) {
-        xhr = sinon.useFakeXMLHttpRequest();
-        requests = [];
-        xhr.onCreate = function (req) {
-            requests.push(req);
-        };
 
         createError();
-        requestsComplete(done);
+        common.requestComplete(done);
 
     });
 
@@ -19,8 +15,9 @@
         clientDetails = getClientDetails();
     });
 
+
     it('Should have client details', function() {
-        var body = JSON.parse(requests[0].requestBody);
+        var body = JSON.parse(common.requests()[0].requestBody);
         expect(body.Details).not.toEqual("");
     });
 
@@ -63,7 +60,7 @@
     });
 
     function getClientDetails() {
-        var body = JSON.parse(requests[0].requestBody);
+        var body = JSON.parse(common.requests()[0].requestBody);
         return body.session.client;
     }
 
@@ -71,15 +68,6 @@
         setTimeout(function () {
             throw new Error("Test Error");
         }, 5);
-
-    }
-
-    function requestsComplete(done) {
-        if (requests.length > 0) {
-            done();
-        } else {
-            setTimeout(requestsComplete, 10, done);
-        }
 
     }
 });
