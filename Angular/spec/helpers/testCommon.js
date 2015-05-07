@@ -27,8 +27,12 @@
         $httpBackend.verifyNoOutstandingRequest();
     }));    
     
+	afterEach(function(){
+		expect(localStorage.length).toEqual(0, "Local storage not cleared of messages");
+	});    
+    
    function executeTest(logFn, fn){
-        httpBackend.expectPOST(expectedUrl, fn).respond(200);
+        httpBackend.expectPOST(expectedUrl, fn).respond(204);
 
         timeout.flush();
         httpBackend.flush();        

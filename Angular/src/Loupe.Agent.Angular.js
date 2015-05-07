@@ -231,8 +231,22 @@
             return null;
         }
 
+
+        function removeMessagesFromStorage(keys){
+            for(var i=0; i < keys.length; i++){
+              try {
+                  localStorage.removeItem(localStorage.key(i));	
+              } catch (e) {
+                  consoleLog("Unable to remove message from localStorage: " + e.message);
+                  console.dir(e);
+              }
+            }        
+        }
+
         function logMessageToServer() {
-            var messages = getMessagesToSend();
+            var messageDetails = getMessagesToSend();        
+            var messages = messageDetails[0];
+            var keys = messageDetails[1];
             
             if(messages.length) {
                 var logMessage = {
@@ -246,13 +260,18 @@
                      logMessage.session.sessionId = sessionId;
                  }
                  
-                sendMessageToServer(logMessage);            
+                sendMessageToServer(logMessage, keys);            
             }
         }
 
-        function sendMessageToServer(logMessage){
+        function sendMessageToServer(logMessage, keys){
             var http = $injector.get("$http");
             http.post("/Loupe/Log", angular.toJson(logMessage))
+                .success(function(response, status){
+                    if(status === 200 || status === 204 && keys.length){
+                        removeMessagesFromStorage(keys);
+                    }
+                })
                 .error(function logMessageError(data, status, headers, config) {
                     $log.warn("Loupe Angular Logger: Exception while attempting to log");
                     $log.log("  status: " + status);
@@ -380,6 +399,7 @@
 
         function getMessagesToSend(){
             var messages=[];
+            var keys =[];
             
             if(messageStorage.length){
                 messages = messageStorage.slice();
@@ -387,7 +407,6 @@
             } 
             
             if(localStorageAvailable){
-                var keys =[];
                 
         		for(var i=0; i < localStorage.length; i++){
         			if(localStorage.key(i).indexOf('Loupe') > -1){
@@ -405,7 +424,7 @@
                 }
             }
             
-            return messages;
+            return [messages, keys];
         }
 
         function sanitiseArgument(parameter){
