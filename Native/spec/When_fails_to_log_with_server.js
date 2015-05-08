@@ -54,7 +54,11 @@ describe("When fails to log with server", function(){
 
 		messageFn.waitToBeLogged(function() {    
             expect(localStorage.length).toEqual(2);
+			var myItem = localStorage.getItem("myItem");
+			expect(myItem).not.toBeNull();
 			
+			var userLoupeItem = localStorage.getItem("Loupe");
+			expect(userLoupeItem).not.toBeNull();
 			done();
 		});
     });	

@@ -65,5 +65,11 @@ describe("When fails to log to server", function(){
         $timeout.flush();
         $httpBackend.flush();
         expect(localStorage.length).toEqual(2);
+        
+		var myItem = localStorage.getItem("myItem");
+		expect(myItem).not.toBeNull();
+		
+		var userLoupeItem = localStorage.getItem("Loupe");
+		expect(userLoupeItem).not.toBeNull();        
     }));
 });
