@@ -38,6 +38,16 @@
 
 };
 
+function webStorageSupported() {
+    var testValue="_loupe_storage_test_";
+    try {
+      localStorage.setItem(testValue, testValue);
+      localStorage.removeItem(testValue);
+      return true;
+    } catch (e) {
+      return false;
+    }
+}
 
 function hasExpectedStack(stackTrace, expectedFrames) {
     return expectedFrames.every(function (item) {

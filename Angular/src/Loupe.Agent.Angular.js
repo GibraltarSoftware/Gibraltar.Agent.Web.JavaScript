@@ -68,7 +68,7 @@
 
         function addSendMessageCommandToEventQueue(){
             // check for unsent messages on start up
-            if(localStorage.length){
+            if(storageAvailable && localStorage.length || messageStorage.length){
                 var timeout = $injector.get("$timeout");
                 timeout(logMessageToServer, 10);
             }        

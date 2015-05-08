@@ -1,9 +1,12 @@
 function testCommon() {
 	var xhr, requests;
     var responseCodes =[];
+    var storageIsSupported = webStorageSupported();
     
     beforeAll(function(){
-       localStorage.clear(); 
+        if(storageIsSupported){
+            localStorage.clear(); 
+        }
     });	
 	
     beforeEach(function() {
@@ -19,7 +22,9 @@ function testCommon() {
     });	
 	
 	afterEach(function(){
-		expect(localStorage.length).toEqual(0, "Local storage not cleared of messages");
+        if(storageIsSupported){
+		  expect(localStorage.length).toEqual(0, "Local storage not cleared of messages");
+        }
 	});
     
     function requestComplete(done, beenCalled) {
@@ -58,10 +63,15 @@ function testCommon() {
         responseCodes = codes;
     }
     
+    function getStorageSupported(){
+        return storageIsSupported;        
+    }
+    
     return {
         requestComplete: requestComplete,
         requests: getRequests,
         requestBody: getRequestBody,
-        setResponseCodes: setResponseCodes
+        setResponseCodes: setResponseCodes,
+        storageSupported: getStorageSupported
     };
 }

@@ -7,9 +7,7 @@
     var sequenceNumber = 0;
     var sessionId;
     var messageStorage = [];
-    var localStorageAvailable = localStorageSupported();
-    var sessionStorageAvailable = sessionStorageSupported();
-    var self = this;
+    var storageAvailable = storageSupported();
     
     loupe.logMessageSeverity = {
         none: 0,
@@ -24,7 +22,7 @@
 
     setUpOnError(window);
     setUpSequenceNumber();
-    sendMessages();
+    addSendMessageCommandToEventQueue();
 
     var verbose = partial(write, loupe.logMessageSeverity.verbose);
     var information = partial(write, loupe.logMessageSeverity.information);
@@ -46,9 +44,9 @@
     return loupe.agent;
 
 
-    function sendMessages(){
+    function addSendMessageCommandToEventQueue(){
         // check for unsent messages on start up
-        if(localStorageAvailable && localStorage.length || messageStorage.length){
+        if(storageAvailable && localStorage.length || messageStorage.length){
             setTimeout(logMessageToServer,10);
         }        
     }
@@ -84,7 +82,7 @@
         
         createMessage(severity,category, caption, description, parameters, exception, details, null);
         
-        sendMessages();
+        addSendMessageCommandToEventQueue();
     }
 
     function createHelpers() {
@@ -225,26 +223,21 @@
         return logMessageToServer();
     }
 
-    function localStorageSupported() {
-      try {
-        return 'localStorage' in window && window['localStorage'] !== null;
-      } catch (e) {
-        return false;
-      }
-    }
-    
-    function sessionStorageSupported(){
-        try{
-            return 'sessionStorage' in window && window['sessionStorage'] != null;
-        } catch(e){
-            return false;
+    function storageSupported() {
+        var testValue="_loupe_storage_test_";
+        try {
+          localStorage.setItem(testValue, testValue);
+          localStorage.removeItem(testValue);
+          return true;
+        } catch (e) {
+          return false;
         }
     }
 
     function setUpSequenceNumber(){
         var sequence = getSequenceNumber();
         
-        if(sequence === -1 && sessionStorageAvailable){
+        if(sequence === -1 && storageAvailable){
             // unable to get a sequence number
             sequenceNumber = 0;
         } else {
@@ -255,7 +248,7 @@
     function getNextSequenceNumber(){
         var storedSequenceNumber;
         
-        if(sessionStorageAvailable){
+        if(storageAvailable){
             // try and get sequence number from session storage
             storedSequenceNumber = getSequenceNumber();
             
@@ -281,7 +274,7 @@
     }
 
     function getSequenceNumber(){
-        if(sessionStorageAvailable){
+        if(storageAvailable){
             try {
                 var currentNumber = sessionStorage.getItem("LoupeSequenceNumber");
                 if(currentNumber){
@@ -303,7 +296,7 @@
             sessionStorage.setItem("LoupeSequenceNumber", sequenceNumber);
             return true;
         } catch (e){
-            consoleLog("Unable to store sequence number");
+            consoleLog("Unable to store sequence number: " + e.message);
             return false;
         }
     }
@@ -330,15 +323,20 @@
           sequence: messageSequenceNumber
         };
         
-        if(localStorageAvailable) {
+        storeMessage(message);
+    }
+
+    function storeMessage(message){
+        if(storageAvailable) {
             try{
                 localStorage.setItem("Loupe-message-" + generateUUID() ,JSON.stringify(message));
             } catch (e){
+                consoleLog("Error occured trying to add item to localStorageL " + e.message);
                 messageStorage.push(message);
             }
         } else {
             messageStorage.push(message);
-        }     
+        }            
     }
 
     function createExceptionFromError(error, cause){
@@ -399,13 +397,15 @@
             messageStorage.length = 0;
         } 
         
-        if(localStorageAvailable){
+        if(storageAvailable){
+            // look for messages in localStorage and add to messages array
     		for(var i=0; i < localStorage.length; i++){
     			if(localStorage.key(i).indexOf('Loupe-message-') > -1){
                     keys.push(localStorage.key(i));
     				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
     			}
     		}
+            // sort the messages by their sequence
             if(messages.length && messages.length > 1){
                 messages.sort(function(a,b){return a.sequence - b.sequence;});
             }

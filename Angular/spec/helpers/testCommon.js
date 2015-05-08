@@ -2,6 +2,7 @@
     var expectedUrl = '/Loupe/Log';
     var logService;
     var httpBackend, timeout;
+    var getStorageIsSupported = webStorageSupported();
    
     if(typeof moduleToLoad == "undefined"){
         moduleToLoad = 'testApp';
@@ -28,7 +29,9 @@
     }));    
     
 	afterEach(function(){
-		expect(localStorage.length).toEqual(0, "Local storage not cleared of messages");
+        if(getStorageIsSupported){
+		  expect(localStorage.length).toEqual(0, "Local storage not cleared of messages");
+        }
 	});    
     
    function executeTest(logFn, fn, responseCode){
@@ -46,9 +49,13 @@
         return logService;
     }
 
+    function getStorageIsSupported(){
+        return getStorageIsSupported;
+    }
     
     return {
         logService: getLogService,
-        executeTest:executeTest
+        executeTest:executeTest,
+        storageSupported: getStorageIsSupported
     };
  }

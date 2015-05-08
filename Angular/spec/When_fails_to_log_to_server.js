@@ -2,6 +2,10 @@ describe("When fails to log to server", function(){
     var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService;
     
+    if(!webStorageSupported()){
+        pending("Tests not run as web storage is not supported");
+    }
+    
     beforeEach(module('testApp', function ($exceptionHandlerProvider) {
         $exceptionHandlerProvider.mode('log');
     }));

@@ -147,3 +147,14 @@ function createTimeStamp() {
         + 'T' + pad(now.getHours())
         + ':' + pad(now.getMinutes());
 }
+
+function webStorageSupported() {
+    var testValue="_loupe_storage_test_";
+    try {
+      localStorage.setItem(testValue, testValue);
+      localStorage.removeItem(testValue);
+      return true;
+    } catch (e) {
+      return false;
+    }
+}

@@ -1,8 +1,13 @@
 describe("When fails to log with server", function(){
 	
     var common = testCommon();
+	
+	if(!common.storageSupported()){
+		pending("Tests not run as web storage is not supported");
+	}
+	
     var messageFn = new Messages();
-
+	
     beforeEach(function () {
         messageFn.init(common.requests());
     });
