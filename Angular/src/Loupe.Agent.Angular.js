@@ -7,8 +7,7 @@
         var sequenceNumber;
         var sessionId;
         var messageStorage = [];
-        var localStorageAvailable = localStorageSupported();
-        var sessionStorageAvailable = sessionStorageSupported();
+        var storageAvailable = storageSupported();
         
         var logMessageSeverity = {
             none: 0,
@@ -20,7 +19,7 @@
         };
 
         setUpSequenceNumber();
-        sendAnyExistingMessages();
+        addSendMessageCommandToEventQueue();
 
         var verbose = partial(write, logMessageSeverity.verbose);
         var information = partial(write, logMessageSeverity.information);
@@ -56,33 +55,29 @@
           };
         }
         
-        function localStorageSupported() {
+        function storageSupported() {
+            var testValue="_loupe_storage_test_";
             try {
-                return 'localStorage' in window && window['localStorage'] !== null;
+              localStorage.setItem(testValue, testValue);
+              localStorage.removeItem(testValue);
+              return true;
             } catch (e) {
-                return false;
-            }
-        }
-        
-        function sessionStorageSupported(){
-            try{
-                return 'sessionStorage' in window && window['sessionStorage'] != null;
-            } catch(e){
-                return false;
+              return false;
             }
         }
 
-        function sendAnyExistingMessages(){
+        function addSendMessageCommandToEventQueue(){
             // check for unsent messages on start up
             if(localStorage.length){
-                setTimeout(logMessageToServer,10);
+                var timeout = $injector.get("$timeout");
+                timeout(logMessageToServer, 10);
             }        
         }
 
         function setUpSequenceNumber(){
             var sequence = getSequenceNumber();
             
-            if(sequence === -1 && sessionStorageAvailable){
+            if(sequence === -1 && storageAvailable){
                 // unable to get a sequence number
                 sequenceNumber = 0;
             } else {
@@ -93,7 +88,7 @@
         function getNextSequenceNumber(){
             var storedSequenceNumber;
             
-            if(sessionStorageAvailable){
+            if(storageAvailable){
                 // try and get sequence number from session storage
                 storedSequenceNumber = getSequenceNumber();
                 
@@ -119,7 +114,7 @@
         }
 
         function getSequenceNumber(){
-            if(sessionStorageAvailable){
+            if(storageAvailable){
                 try {
                     var currentNumber = sessionStorage.getItem("LoupeSequenceNumber");
                     if(currentNumber){
@@ -349,8 +344,11 @@
               sequence: messageSequenceNumber
             };
             
-            if(localStorageAvailable) {
+            storeMessage(message);
+        }
 
+        function storeMessage(message){
+            if(storageAvailable) {
                 try{
                     localStorage.setItem("Loupe-message-" + generateUUID(),JSON.stringify(message));
                 } catch (e){
@@ -359,7 +357,7 @@
                 }
             } else {
                 messageStorage.push(message);
-            }        
+            }                 
         }
 
         function createExceptionFromError(error, cause){
@@ -418,7 +416,7 @@
                 messageStorage.length = 0;
             } 
             
-            if(localStorageAvailable){
+            if(storageAvailable){
                 
         		for(var i=0; i < localStorage.length; i++){
         			if(localStorage.key(i).indexOf('Loupe-message-') > -1){
@@ -426,6 +424,10 @@
         				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
         			}
         		}
+                
+                if(messages.length && messages.length > 1){
+                    messages.sort(function(a,b){return a.sequence - b.sequence;});
+                }                
             }
             
             return [messages, keys];
@@ -445,8 +447,7 @@
         
             createMessage(severity, category, caption, description, parameters, details, exception, null);
             
-            var timeout = $injector.get("$timeout");
-            timeout(logMessageToServer, 10);
+            addSendMessageCommandToEventQueue();
         }
 
         function setSessionId(value){
