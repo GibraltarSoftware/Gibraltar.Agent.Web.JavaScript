@@ -94,7 +94,7 @@ module.exports = function(grunt){
 	grunt.loadNpmTasks('grunt-contrib-jasmine');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
-	grunt.registerTask('debug',['clean:debug','connect:server', 'jasmine:debug', 'connect:debug']);
+	grunt.registerTask('debug',['clean:debug', 'jasmine:debug:build', 'connect:debug']);
 	grunt.registerTask('test',['clean:test','copy:test', 'connect:server','jasmine:unit']);
 	grunt.registerTask('default',['clean:build','copy:main', 'uglify', 'connect', 'jasmine:build']);
 };
