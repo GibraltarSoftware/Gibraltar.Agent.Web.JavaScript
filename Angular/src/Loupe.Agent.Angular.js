@@ -74,7 +74,9 @@
 
         function sendAnyExistingMessages(){
             // check for unsent messages on start up
-            setTimeout(logMessageToServer,10);        
+            if(localStorage.length){
+                setTimeout(logMessageToServer,10);
+            }        
         }
 
         function setUpSequenceNumber(){
@@ -235,12 +237,11 @@
         function removeMessagesFromStorage(keys){
             for(var i=0; i < keys.length; i++){
               try {
-                  localStorage.removeItem(localStorage.key(i));	
+                  localStorage.removeItem(keys[i]);	
               } catch (e) {
-                  consoleLog("Unable to remove message from localStorage: " + e.message);
-                  console.dir(e);
+                  $log.log("Unable to remove message from localStorage: " + e.message);
               }
-            }        
+            }
         }
 
         function logMessageToServer() {
@@ -349,11 +350,12 @@
             };
             
             if(localStorageAvailable) {
+
                 try{
-                    localStorage.setItem("Loupe" + timeStamp,JSON.stringify(message));
+                    localStorage.setItem("Loupe-message-" + generateUUID(),JSON.stringify(message));
                 } catch (e){
                     messageStorage.push(message);
-                     $log.log("Error attempting to store Loupe log message in local storage. " + e.message);
+                    $log.log("Error attempting to store Loupe log message in local storage. " + e.message);
                 }
             } else {
                 messageStorage.push(message);
@@ -397,6 +399,16 @@
                 + ':' + pad(tzo % 60);
         }    
 
+        function generateUUID() {
+            var d = Date.now();
+            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = (d + Math.random()*16)%16 | 0;
+                d = Math.floor(d/16);
+                return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+            });
+            return uuid;
+        }
+
         function getMessagesToSend(){
             var messages=[];
             var keys =[];
@@ -409,19 +421,11 @@
             if(localStorageAvailable){
                 
         		for(var i=0; i < localStorage.length; i++){
-        			if(localStorage.key(i).indexOf('Loupe') > -1){
+        			if(localStorage.key(i).indexOf('Loupe-message-') > -1){
                         keys.push(localStorage.key(i));
         				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
         			}
         		}
-               
-        		for(var i=0; i < keys.length; i++){
-        		  try {
-                      localStorage.removeItem(localStorage.key(i));	
-                  } catch (e) {
-                      $log.log("Unable to remove message from localStorage: " + e.message);
-                  }
-                }
             }
             
             return [messages, keys];

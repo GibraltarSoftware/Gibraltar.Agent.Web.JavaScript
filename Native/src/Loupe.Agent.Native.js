@@ -24,7 +24,7 @@
 
     setUpOnError(window);
     setUpSequenceNumber();
-    sendAnyExistingMessages();
+    sendMessages();
 
     var verbose = partial(write, loupe.logMessageSeverity.verbose);
     var information = partial(write, loupe.logMessageSeverity.information);
@@ -46,9 +46,11 @@
     return loupe.agent;
 
 
-    function sendAnyExistingMessages(){
+    function sendMessages(){
         // check for unsent messages on start up
-        setTimeout(logMessageToServer,10);        
+        if(localStorageAvailable && localStorage.length || messageStorage.length){
+            setTimeout(logMessageToServer,10);
+        }        
     }
 
     function setSessionId(value){
@@ -82,7 +84,7 @@
         
         createMessage(severity,category, caption, description, parameters, exception, details, null);
         
-        setTimeout(logMessageToServer, 10);
+        sendMessages();
     }
 
     function createHelpers() {
@@ -330,15 +332,13 @@
         
         if(localStorageAvailable) {
             try{
-                localStorage.setItem("Loupe" + timeStamp,JSON.stringify(message));
+                localStorage.setItem("Loupe-message-" + generateUUID() ,JSON.stringify(message));
             } catch (e){
                 messageStorage.push(message);
-                consoleLog("Error attempting to store Loupe log message in local storage. " + e.message);
-                console.dir(e);
             }
         } else {
             messageStorage.push(message);
-        }       
+        }     
     }
 
     function createExceptionFromError(error, cause){
@@ -368,15 +368,27 @@
                 var norm = Math.abs(Math.floor(num));
                 return (norm < 10 ? '0' : '') + norm;
             };
+            
         return now.getFullYear() 
             + '-' + pad(now.getMonth()+1)
             + '-' + pad(now.getDate())
             + 'T' + pad(now.getHours())
             + ':' + pad(now.getMinutes()) 
             + ':' + pad(now.getSeconds()) 
+            + '.' + pad(now.getMilliseconds())
             + dif + pad(tzo / 60) 
             + ':' + pad(tzo % 60);
     } 
+
+    function generateUUID() {
+        var d = Date.now();
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = (d + Math.random()*16)%16 | 0;
+            d = Math.floor(d/16);
+            return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+        });
+        return uuid;
+    }
 
     function getMessagesToSend(){
         var messages=[];
@@ -389,11 +401,14 @@
         
         if(localStorageAvailable){
     		for(var i=0; i < localStorage.length; i++){
-    			if(localStorage.key(i).indexOf('Loupe') > -1){
+    			if(localStorage.key(i).indexOf('Loupe-message-') > -1){
                     keys.push(localStorage.key(i));
     				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
     			}
     		}
+            if(messages.length && messages.length > 1){
+                messages.sort(function(a,b){return a.sequence - b.sequence;});
+            }
         }
         
         return [messages, keys];
@@ -402,10 +417,9 @@
     function removeMessagesFromStorage(keys){
         for(var i=0; i < keys.length; i++){
           try {
-              localStorage.removeItem(localStorage.key(i));	
+              localStorage.removeItem(keys[i]);	
           } catch (e) {
               consoleLog("Unable to remove message from localStorage: " + e.message);
-              console.dir(e);
           }
         }        
     }
@@ -462,7 +476,6 @@
 
         } catch (e) {
             consoleLog("Loupe JavaScript Logger: Exception while attempting to log");
-            console.dir(e);
             return false;
         }
         

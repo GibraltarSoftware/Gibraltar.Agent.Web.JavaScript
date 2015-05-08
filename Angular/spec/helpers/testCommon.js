@@ -31,8 +31,12 @@
 		expect(localStorage.length).toEqual(0, "Local storage not cleared of messages");
 	});    
     
-   function executeTest(logFn, fn){
-        httpBackend.expectPOST(expectedUrl, fn).respond(204);
+   function executeTest(logFn, fn, responseCode){
+       if(typeof responseCode == "undefined"){
+           responseCode = 204;
+       };
+       
+        httpBackend.expectPOST(expectedUrl, fn).respond(responseCode);
 
         timeout.flush();
         httpBackend.flush();        

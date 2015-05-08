@@ -1,5 +1,6 @@
 function testCommon() {
 	var xhr, requests;
+    var responseCodes =[];
     
     beforeAll(function(){
        localStorage.clear(); 
@@ -30,7 +31,13 @@ function testCommon() {
 
         if (requests.length > 0 || beenCalled > 4) {
             if(requests.length){
-                requests[0].respond(204);
+                var code = 204;
+                
+                if(responseCodes.length){
+                    code = responseCodes.shift();
+                }
+                
+                requests[0].respond(code);
             }
             
             done();
@@ -47,9 +54,14 @@ function testCommon() {
         return JSON.parse(requests[0].requestBody);
     }
     
+    function setResponseCodes(codes){
+        responseCodes = codes;
+    }
+    
     return {
         requestComplete: requestComplete,
         requests: getRequests,
-        requestBody: getRequestBody
+        requestBody: getRequestBody,
+        setResponseCodes: setResponseCodes
     };
 }

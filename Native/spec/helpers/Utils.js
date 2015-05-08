@@ -143,6 +143,7 @@ function createTimeStamp() {
 function Messages(){
     
     var requests=[];
+    var responseCodes=[];
     
     this.init = function(requestsToMonitor){
         requests = requestsToMonitor;
@@ -152,10 +153,22 @@ function Messages(){
         return  JSON.parse(requests[0].requestBody);
     };
     
+    this.setResponseCodes = function(codes){
+        responseCodes = codes;
+    }
+    
     this.waitToBeLogged = function waitForMessageRecieved(fn){
+
         sometimeWhen(function () { 
             if(requests.length){
-                requests[0].respond(204);
+                var code = 204;
+                
+                if(responseCodes.length){
+                    code = responseCodes.shift();
+                }
+                
+                requests[0].respond(code);
+
                 return true;
             }
             return false;
