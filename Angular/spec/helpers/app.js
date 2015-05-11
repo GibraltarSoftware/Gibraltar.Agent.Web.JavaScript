@@ -1,4 +1,4 @@
-﻿var app = angular.module('testApp', ["Loupe.Agent.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
+﻿var app = angular.module('testApp', ["Loupe.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
     $routeProvider.
         when('/', { controller: "TestCtrl" });
 }]);
@@ -39,7 +39,7 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
 }]);
 
 
-var stateApp = angular.module('stateApp', ["Loupe.Agent.Angular", "ui.router"]);
+var stateApp = angular.module('stateApp', ["Loupe.Angular", "ui.router"]);
 
 stateApp.controller('TestCtrl',["$scope", "$exceptionHandler", "loupe.logService", function ($scope, $exceptionHandler, logService) {
 
@@ -57,7 +57,7 @@ stateApp.controller('TestCtrl',["$scope", "$exceptionHandler", "loupe.logService
    
 }]);
 
-var errorApp = angular.module('testErrorApp', ["Loupe.Agent.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
+var errorApp = angular.module('testErrorApp', ["Loupe.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
     $routeProvider.
         when('/', { controller: "TestCtrl" });
 }]);

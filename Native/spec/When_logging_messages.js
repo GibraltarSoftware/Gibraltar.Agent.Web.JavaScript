@@ -6,7 +6,7 @@
     var common = testCommon();
     
     beforeEach(function (done) {
-        loupe.agent.setSessionId(sessionId);
+        loupe.setSessionId(sessionId);
         log();
         common.requestComplete(done);
     });
@@ -63,7 +63,7 @@
     })
 
     function log() {
-        loupe.agent.write(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'],null, 'with details');
+        loupe.write(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'],null, 'with details');
     }
 
     function requestComplete(done) {

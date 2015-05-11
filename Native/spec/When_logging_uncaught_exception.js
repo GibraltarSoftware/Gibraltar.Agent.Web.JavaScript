@@ -8,7 +8,7 @@
     });
 	
     beforeEach(function (done) {
-        loupe.agent.setSessionId(sessionId);
+        loupe.setSessionId(sessionId);
         createError();
         common.requestComplete(done);
     });

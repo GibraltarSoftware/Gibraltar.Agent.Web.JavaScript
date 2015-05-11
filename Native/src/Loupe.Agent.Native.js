@@ -1,4 +1,4 @@
-﻿(function (loupe, window) {
+﻿(function (window) {
 
     var existingOnError = window.onerror;
     var stackTrace;
@@ -9,7 +9,7 @@
     var messageStorage = [];
     var storageAvailable = storageSupported();
     
-    loupe.logMessageSeverity = {
+    var logMessageSeverity = {
         none: 0,
         critical: 1,
         error: 2,
@@ -19,18 +19,17 @@
     };
 
     createHelpers();
-
     setUpOnError(window);
     setUpSequenceNumber();
     addSendMessageCommandToEventQueue();
 
-    var verbose = partial(write, loupe.logMessageSeverity.verbose);
-    var information = partial(write, loupe.logMessageSeverity.information);
-    var warning = partial(write, loupe.logMessageSeverity.warning);
-    var error = partial(write, loupe.logMessageSeverity.error);
-    var critical = partial(write, loupe.logMessageSeverity.critical);
+    var verbose = partial(write, logMessageSeverity.verbose);
+    var information = partial(write, logMessageSeverity.information);
+    var warning = partial(write, logMessageSeverity.warning);
+    var error = partial(write, logMessageSeverity.error);
+    var critical = partial(write, logMessageSeverity.critical);
 
-    loupe.agent = {
+    window.loupe = {
         verbose: verbose,
         information: information,
         warning: warning,
@@ -38,11 +37,9 @@
         critical: critical,
         write: write,
         setSessionId: setSessionId,
-        propagateOnError: propagateError
+        propagateOnError: propagateError,
+        logMessageSeverity: logMessageSeverity
     };
-
-    return loupe.agent;
-
 
     function addSendMessageCommandToEventQueue(){
         // check for unsent messages on start up
@@ -123,7 +120,7 @@
             // us to return false but logically we want to state we
             // want to propagate i.e. true, so we reverse the bool
             // so users can set as they expect not how browser expects
-            return !loupe.agent.propagateOnError;
+            return !loupe.propagateOnError;
         };
 
     }
@@ -2029,5 +2026,5 @@
         
     }
 
-})(window.loupe = window.loupe || {}, window);
+})(window);
 

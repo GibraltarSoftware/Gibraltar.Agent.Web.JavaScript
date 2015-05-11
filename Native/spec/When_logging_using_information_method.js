@@ -8,7 +8,7 @@ describe('When logging using information methods', function () {
     });
     
     it('Should log severity level information', function(done) {
-        loupe.agent.information('test', 'test logs message','test log description including parameter {0}',['test']);
+        loupe.information('test', 'test logs message','test log description including parameter {0}',['test']);
         
         messageFn.waitToBeLogged(function(){
             var body = messageFn.getRequestBody();
@@ -20,7 +20,7 @@ describe('When logging using information methods', function () {
     	
     it('Should log severity level information with exception', function(done) {
         var suppliedError = new Error("Custom error");
-        loupe.agent.information('test', 'test logs message','test log description including parameter {0}',['test'], suppliedError);        
+        loupe.information('test', 'test logs message','test log description including parameter {0}',['test'], suppliedError);        
         
         messageFn.waitToBeLogged(function() {
             var body = messageFn.getRequestBody();
@@ -33,7 +33,7 @@ describe('When logging using information methods', function () {
     });    
 
     it('Should log details', function(done) {
-        loupe.agent.information('test', 'test logs message','test log description including parameter {0}',['test'], null,"<data>test details</data>");
+        loupe.information('test', 'test logs message','test log description including parameter {0}',['test'], null,"<data>test details</data>");
 
         messageFn.waitToBeLogged(function(){
             var body = messageFn.getRequestBody();

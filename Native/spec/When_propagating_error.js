@@ -19,7 +19,7 @@
     });
 
     beforeEach(function(done) {
-        loupe.agent.propagateOnError = true;
+        loupe.propagateOnError = true;
         createSimpleError();
         common.requestComplete(done);
     });

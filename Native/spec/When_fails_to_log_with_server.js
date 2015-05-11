@@ -16,7 +16,7 @@ describe("When fails to log with server", function(){
 		
 		messageFn.setResponseCodes([500]);
 		
-		loupe.agent.information('test', 'test logs message','test log description');
+		loupe.information('test', 'test logs message','test log description');
        
 		messageFn.waitToBeLogged(function() {    
             expect(localStorage.length).toEqual(1);
@@ -28,13 +28,13 @@ describe("When fails to log with server", function(){
 	
 	it('Should send all messages in local storage', function(done){
 		messageFn.setResponseCodes([500,200]);
-		loupe.agent.information('test', '1st message');
+		loupe.information('test', '1st message');
 
 		messageFn.waitToBeLogged(function() {    
 			expect(localStorage.length).toEqual(1);
 			common.requests().length=0;
 
-			loupe.agent.information('test', '2nd message');
+			loupe.information('test', '2nd message');
 			
 			messageFn.waitToBeLogged(function() {    
 	            var data = messageFn.getRequestBody();
@@ -55,7 +55,7 @@ describe("When fails to log with server", function(){
         localStorage.setItem("myItem","a value");
         localStorage.setItem("Loupe","user loupe value should not be removed");
         
-		loupe.agent.information('test', 'test logs message','test log description');
+		loupe.information('test', 'test logs message','test log description');
 
 		messageFn.waitToBeLogged(function() {    
             expect(localStorage.length).toEqual(2);

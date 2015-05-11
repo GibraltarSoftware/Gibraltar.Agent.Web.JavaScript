@@ -9,7 +9,7 @@ describe('When logging using error method', function () {
 	
     
     it('Should log severity level error', function(done) {
-        loupe.agent.error('test', 'test logs message','test log description including parameter {0}',['test']);
+        loupe.error('test', 'test logs message','test log description including parameter {0}',['test']);
         
         messageFn.waitToBeLogged(function(){
             var body = messageFn.getRequestBody();
@@ -23,7 +23,7 @@ describe('When logging using error method', function () {
     	
     it('Should log severity level error with exception', function(done) {
         var suppliedError = new Error("Custom error");
-        loupe.agent.error('test', 'test logs message','test log description including parameter {0}',['test'], suppliedError);        
+        loupe.error('test', 'test logs message','test log description including parameter {0}',['test'], suppliedError);        
         
         messageFn.waitToBeLogged(function() {
             var body = messageFn.getRequestBody();
@@ -36,7 +36,7 @@ describe('When logging using error method', function () {
     });    
 
     it('Should log severity level warning with details', function(done) {
-        loupe.agent.error('test', 'test logs message','test log description including parameter {0}',['test'], null,"<data>test details</data>");
+        loupe.error('test', 'test logs message','test log description including parameter {0}',['test'], null,"<data>test details</data>");
 
         messageFn.waitToBeLogged(function(){
             var body = messageFn.getRequestBody();

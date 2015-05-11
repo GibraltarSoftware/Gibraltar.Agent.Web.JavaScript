@@ -1,4 +1,4 @@
-﻿angular.module("Loupe.Agent.Angular", [])
+﻿angular.module("Loupe.Angular", [])
     .factory("loupe.logService", ["$log", "$window", "$injector", "loupe.stacktraceService", "loupe.platformService", 
     function ($log, $window, $injector, stacktraceService, platformService) {
         // The error log service logs angular errors to the server
@@ -57,13 +57,23 @@
         
         function storageSupported() {
             var testValue="_loupe_storage_test_";
+            var stored;
             try {
               localStorage.setItem(testValue, testValue);
-              localStorage.removeItem(testValue);
-              return true;
+              stored = true;
             } catch (e) {
-              return false;
+              stored = false;
             }
+            
+            if(stored){
+                try {
+                    localStorage.removeItem(testValue);
+                } catch(e){
+                    stored = false;
+                }
+            }
+            
+            return stored;
         }
 
         function addSendMessageCommandToEventQueue(){
@@ -1014,7 +1024,7 @@
             // if an exception occurs whilst tryng to get
             // platform information then we can't do much
             // so log exception to console and move on
-            consoleLog("Unable to get platform info: " + e.message);
+            $log.log("Unable to get platform info: " + e.message);
             clientPlatform = {};
         }
 
