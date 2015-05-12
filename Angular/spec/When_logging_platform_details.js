@@ -1,7 +1,6 @@
 ﻿describe('When logging platform details', function() {
-    var expectedUrl = '/Loupe/Log';
     var $scope, ctrl, logService, clientDetails;
-    var common = testCommon();
+    var common = testCommon('testApp');
 
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler) {
         $scope = $rootScope.$new();

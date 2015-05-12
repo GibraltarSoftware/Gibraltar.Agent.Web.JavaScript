@@ -1,7 +1,7 @@
 ﻿describe('When logging a message', function() {
     var $scope, ctrl, logService;
     var sessionId = "angular-session-abc-123";
-    var common = testCommon();
+    var common = testCommon('testApp');
 
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler) {
         logService = common.logService();

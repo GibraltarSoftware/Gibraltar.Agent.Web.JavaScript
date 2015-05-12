@@ -1,4 +1,4 @@
-﻿xdescribe('When state details in exception', function() {
+﻿describe('When state details in exception', function() {
     var $scope, ctrl, logService;
 
     var common = testCommon('stateApp');
@@ -29,7 +29,7 @@
                             function (requestBody) {
                                 var data = JSON.parse(requestBody);
                                 var details = JSON.parse(data.logMessages[0].details);
-                                expect(details.Page.RouteUrl).toBe('/');
+                                expect(details.page.routeUrl).toBe('/');
                                 return true;
                             });
     });
@@ -39,7 +39,7 @@
                             function (requestBody) {
                                 var data = JSON.parse(requestBody);
                                 var details = JSON.parse(data.logMessages[0].details);
-                                expect(details.Page.RouteName).toBe("Home");
+                                expect(details.page.routeName).toBe("Home");
                                 return true;
                             });
     });
@@ -49,7 +49,7 @@
                             function (requestBody) {
                                 var data = JSON.parse(requestBody);
                                 var details = JSON.parse(data.logMessages[0].details);
-                                expect(details.Page.TemplateUrl).toBe("/");
+                                expect(details.page.templateUrl).toBe("/");
                                 return true;
                             });
     }));
@@ -59,7 +59,7 @@
                             function (requestBody) {
                                 var data = JSON.parse(requestBody);
                                 var details = JSON.parse(data.logMessages[0].details);
-                                expect(details.Page.Parameters).toEqual(["a",1]);
+                                expect(details.page.parameters).toEqual(["a",1]);
                                 return true;
                             });
     }));

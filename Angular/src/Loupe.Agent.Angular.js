@@ -295,22 +295,22 @@
                 var routeState = getRouteState();
                 var errorMessage = exception.toString();
                 var stackTrace = getStackTrace(exception);
-                
+                var customAngularErrorDetails;
+
                 // Log the angular error to the server.
-//                if (routeState) {
-//                    data.Controller = routeState.controller;
-//
-//                    var details = {
-//                        Page: {
-//                            RouteName: routeState.name,
-//                            RouteUrl: routeState.url,
-//                            Controller: routeState.controller,
-//                            TemplateUrl: routeState.templateUrl,
-//                            Parameters: routeState.parameters
-//                        }
-//                    };
-//                    data.Details = JSON.stringify(details);
-//                };
+                if (routeState) {
+                    var details = {
+                        controller: routeState.controller,
+                        page: {
+                            routeName: routeState.name,
+                            routeUrl: routeState.url,
+                            controller: routeState.controller,
+                            templateUrl: routeState.templateUrl,
+                            parameters: routeState.parameters
+                        }
+                    };
+                    customAngularErrorDetails = JSON.stringify(details);
+                };
 
                 var loupeException = {
                     message: errorMessage,
@@ -321,7 +321,7 @@
                     column: null,                        
                 };
 
-                createMessage(logMessageSeverity.error,"JavaScript","","",null,null,loupeException,null);
+                createMessage(logMessageSeverity.error,"JavaScript","","",null,customAngularErrorDetails,loupeException,null);
 
                 logMessageToServer();
 

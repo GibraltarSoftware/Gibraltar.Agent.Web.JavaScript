@@ -1,6 +1,5 @@
 ﻿describe("When logging stack trace", function() {
-    var expectedUrl = '/Loupe/Log';
-    var $scope, ctrl, logService, clientDetails;
+    var $scope, ctrl, logService;
     var common = testCommon('testErrorApp');
 
 

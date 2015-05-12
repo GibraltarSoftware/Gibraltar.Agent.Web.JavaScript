@@ -2,20 +2,8 @@
     var $scope, ctrl, logService;
     var sessionId = 'angular-session-def-456';
  
-     var common = testCommon();   
- 
-    beforeAll(function() {
+    var common = testCommon('testApp', '/');   
 
-        module(function($provide) {
-            $provide.factory('$location', function() {
-                return {
-                    absUrl: function () {return '/'}
-                }
-            })
-        });
-
-    });
-       
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler, $route, $location) {
         logService = common.logService();
         $scope = $rootScope.$new();

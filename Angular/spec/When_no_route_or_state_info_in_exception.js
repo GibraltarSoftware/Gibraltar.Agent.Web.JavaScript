@@ -1,18 +1,7 @@
-﻿xdescribe('When no route or state info in exception', function() {
+﻿describe('When no route or state info in exception', function() {
     var $scope, ctrl, logService;
-    var common = testCommon();
+    var common = testCommon('testApp', '/');
     
-    beforeAll(function () {
-
-        module(function ($provide) {
-            $provide.factory('$location', function () {
-                return {
-                    absUrl: function () { return '/' }
-                }
-            });
-        });
-    });
-
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler, $location) {
         $scope = $rootScope.$new();
 
@@ -28,9 +17,9 @@
     it('Should have correct Route Url', function () {
         common.executeTest(ctrl.throwSimpleError(),
                            function (requestBody) {
-                                var data = JSON.parse(requestBody);
-                                var details = data.logMessages[0].details;
-                                expect(details.Page.RouteUrl).toBe('/');
+                               var data = JSON.parse(requestBody);
+                               var details = JSON.parse(data.logMessages[0].details);
+                               expect(details.page.routeUrl).toEqual('/');
                                 return true;
                             });
     });
@@ -38,9 +27,9 @@
     it('Should have empty route name', function () {
         common.executeTest(ctrl.throwSimpleError(),
                            function (requestBody) {
-                                var data = JSON.parse(requestBody);
-                                var details = data.logMessages[0].details;
-                                expect(details.Page.RouteName).toBe("");
+                               var data = JSON.parse(requestBody);
+                               var details = JSON.parse(data.logMessages[0].details);
+                                expect(details.page.routeName).toBe("");
                                 return true;
                             });
     });
@@ -48,9 +37,9 @@
     it('Should have empty templateUrl', function () {
         common.executeTest(ctrl.throwSimpleError(),
                            function (requestBody) {
-                                var data = JSON.parse(requestBody);
-                                var details = JSON.parse(data.Details);
-                                expect(details.Page.TemplateUrl).toBe("");
+                               var data = JSON.parse(requestBody);
+                               var details = JSON.parse(data.logMessages[0].details);
+                                expect(details.page.templateUrl).toBe("");
                                 return true;
                             });
     });
@@ -58,9 +47,9 @@
     it('Should have empty parameters', inject(function ($httpBackend) {
         common.executeTest(ctrl.throwSimpleError(),
                            function (requestBody) {
-                                var data = JSON.parse(requestBody);
-                                var details = JSON.parse(data.Details);
-                                expect(details.Page.Parameters).toEqual([]);
+                               var data = JSON.parse(requestBody);
+                               var details = JSON.parse(data.logMessages[0].details);
+                                expect(details.page.parameters).toEqual([]);
                                 return true;
                             });
     }));

@@ -1,5 +1,5 @@
 describe('When logging using critical method', function() {
-    var common = testCommon();
+    var common = testCommon('testApp');
     var $scope, ctrl, logService;
 
     beforeEach(inject(function ($rootScope, $controller, $exceptionHandler) {

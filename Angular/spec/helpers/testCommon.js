@@ -1,14 +1,25 @@
- function testCommon(moduleToLoad) {
+ function testCommon(moduleToLoad, url) {
     var expectedUrl = '/Loupe/Log';
     var logService;
     var httpBackend, timeout;
-    var getStorageIsSupported = webStorageSupported();
+    var storageIsSupported = webStorageSupported();
    
     if(typeof moduleToLoad == "undefined"){
-        moduleToLoad = 'testApp';
+        throw 'No module specified to load, unable to execute specs';
     }
-   
-    
+
+    beforeEach(function () {
+        if(url){
+            module(function ($provide) {
+                $provide.factory('$location', function () {
+                    return {
+                        absUrl: function () { return url; }
+                    }
+                });
+            });
+        }
+    });   
+       
     beforeEach(module(moduleToLoad, function ($exceptionHandlerProvider) {
         $exceptionHandlerProvider.mode('log');
     }));
@@ -50,7 +61,7 @@
     }
 
     function getStorageIsSupported(){
-        return getStorageIsSupported;
+        return storageIsSupported;
     }
     
     return {
