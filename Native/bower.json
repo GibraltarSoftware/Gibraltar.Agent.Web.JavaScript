@@ -6,7 +6,7 @@
     "Gibraltar Software Inc."
   ],
   "description": "Loupe agent for Javascript",
-  "main": "Loupe.Agent.Native.js",
+  "main": "dist/Loupe.Agent.Native.js",
   "moduleType": [
     "globals"
   ],
@@ -16,7 +16,6 @@
   ],
   "license": "Apache License 2.0",
   "ignore": [
-    "**/.*",
     "node_modules",
     "bower_components",
     "test",
