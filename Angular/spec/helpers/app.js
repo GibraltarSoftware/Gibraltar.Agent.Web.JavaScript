@@ -13,6 +13,10 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
         logService.setSessionId = value;
     };
 
+    $scope.clientSessionHeader = function(){
+        return logService.clientSessionHeader();
+    };
+
     $scope.logMessage = function(logText) {
         logService.write(logService.logMessageSeverity.information, 'test', logText,"log description",["parameter"],null,"details");
     };

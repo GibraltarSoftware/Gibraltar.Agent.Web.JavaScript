@@ -1,11 +1,12 @@
 ﻿angular.module("Loupe.Angular", [])
-    .factory("loupe.logService", ["$log", "$window", "$injector", "loupe.stacktraceService", "loupe.platformService", 
+    .factory("loupe.logService", ["$log", "$window", "$injector", "loupe.stacktraceService", "loupe.platformService",
     function ($log, $window, $injector, stacktraceService, platformService) {
         // The error log service logs angular errors to the server
         // This is called from the existing Angular exception handler, as setup by a decorator
        
         var sequenceNumber;
         var sessionId;
+        var clientSessionId;
         var messageStorage = [];
         var storageAvailable = storageSupported();
         
@@ -18,6 +19,7 @@
             verbose: 16,
         };
 
+        setUpClientSessionId();
         setUpSequenceNumber();
         addSendMessageCommandToEventQueue();
 
@@ -36,7 +38,8 @@
             error: error,
             critical: critical,
             logMessageSeverity: logMessageSeverity,
-            setSessionId: setSessionId
+            setSessionId: setSessionId,
+            clientSessionHeader: clientSessionHeader            
         };
         
         return  logService;
@@ -82,6 +85,46 @@
                 var timeout = $injector.get("$timeout");
                 timeout(logMessageToServer, 10);
             }        
+        }
+
+        function clientSessionHeader(){
+            return {
+                'headerName': 'loupe-client-session',
+                'headerValue': clientSessionId
+            };
+        }
+    
+        function setUpClientSessionId(){
+            var currentClientSessionId = getClientSessionHeader();
+            if(currentClientSessionId){
+                clientSessionId = currentClientSessionId;
+            } else{
+                clientSessionId = generateUUID();
+                storeClientSessionId(clientSessionId);
+            }
+        }
+    
+        function storeClientSessionId(sessionIdToStore){
+            if(storageAvailable){
+                try{
+                    sessionStorage.setItem("LoupeClientSessionId", sessionIdToStore)
+                } catch(e){
+                    consoleLog("Unable to store clientSessionId in session storage. " + e.message);
+                }
+            }
+        }
+    
+        function getClientSessionHeader(){
+            try {
+                var clientSessionId = sessionStorage.getItem("LoupeClientSessionId");
+                if(clientSessionId){
+                    return clientSessionId;
+                } 
+            } catch (e) {
+                consoleLog("Unable to retrieve clientSessionId number from session storage. " + e.message);
+            }
+            
+            return null;      
         }
 
         function setUpSequenceNumber(){

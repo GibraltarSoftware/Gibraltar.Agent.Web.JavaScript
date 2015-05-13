@@ -64,9 +64,14 @@
         return storageIsSupported;
     }
     
+    function getHttpBackend(){
+        return httpBackend;
+    }
+    
     return {
         logService: getLogService,
         executeTest:executeTest,
-        storageSupported: getStorageIsSupported
+        storageSupported: getStorageIsSupported,
+        httpBackend: getHttpBackend
     };
  }

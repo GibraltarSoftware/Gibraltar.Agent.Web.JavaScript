@@ -6,6 +6,7 @@
     var propagateError = false;
     var sequenceNumber = 0;
     var sessionId;
+    var clientSessionId;
     var messageStorage = [];
     var storageAvailable = storageSupported();
     
@@ -20,15 +21,19 @@
 
     createHelpers();
     setUpOnError(window);
+    setUpClientSessionId();
     setUpSequenceNumber();
     addSendMessageCommandToEventQueue();
 
+    // set up partial method calls for the convience methods
     var verbose = partial(write, logMessageSeverity.verbose);
     var information = partial(write, logMessageSeverity.information);
     var warning = partial(write, logMessageSeverity.warning);
     var error = partial(write, logMessageSeverity.error);
     var critical = partial(write, logMessageSeverity.critical);
 
+    // specify the functionality exposed via the loupe object
+    // from window
     window.loupe = {
         verbose: verbose,
         information: information,
@@ -38,8 +43,10 @@
         write: write,
         setSessionId: setSessionId,
         propagateOnError: propagateError,
-        logMessageSeverity: logMessageSeverity
+        logMessageSeverity: logMessageSeverity,
+        clientSessionHeader: clientSessionHeader
     };
+
 
     function addSendMessageCommandToEventQueue(){
         // check for unsent messages on start up
@@ -229,6 +236,46 @@
         } catch (e) {
           return false;
         }
+    }
+
+    function clientSessionHeader(){
+        return {
+            'headerName': 'loupe-client-session',
+            'headerValue': clientSessionId
+        };
+    }
+
+    function setUpClientSessionId(){
+        var currentClientSessionId = getClientSessionHeader();
+        if(currentClientSessionId){
+            clientSessionId = currentClientSessionId;
+        } else{
+            clientSessionId = generateUUID();
+            storeClientSessionId(clientSessionId);
+        }
+    }
+
+    function storeClientSessionId(sessionIdToStore){
+        if(storageAvailable){
+            try{
+                sessionStorage.setItem("LoupeClientSessionId", sessionIdToStore)
+            } catch(e){
+                consoleLog("Unable to store clientSessionId in session storage. " + e.message);
+            }
+        }
+    }
+
+    function getClientSessionHeader(){
+        try {
+            var clientSessionId = sessionStorage.getItem("LoupeClientSessionId");
+            if(clientSessionId){
+                return clientSessionId;
+            } 
+        } catch (e) {
+            consoleLog("Unable to retrieve clientSessionId number from session storage. " + e.message);
+        }
+        
+        return null;      
     }
 
     function setUpSequenceNumber(){
