@@ -33,7 +33,7 @@ module.exports = function(grunt){
 		connect: {
 			server: {
 				options: {
-					port: 3379
+					port: 3378
 				}
 			},
 			debug: {
@@ -46,7 +46,7 @@ module.exports = function(grunt){
 		},
 		jasmine : {
 			options: {
-					host: 'http://127.0.0.1:3379',
+					host: 'http://127.0.0.1:3378',
 					specs : ['spec/*.js','!spec/When_logging_stack_trace.js'],
 					helpers: ['spec/helpers/*.js'],
 					vendor: ['spec/vendor/angular.js', 

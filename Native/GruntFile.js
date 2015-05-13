@@ -96,5 +96,5 @@ module.exports = function(grunt){
 
 	grunt.registerTask('debug',['clean:debug', 'jasmine:debug:build', 'connect:debug']);
 	grunt.registerTask('test',['clean:test','copy:test', 'connect:server','jasmine:unit']);
-	grunt.registerTask('default',['clean:build','copy:main', 'uglify', 'connect', 'jasmine:build']);
+	grunt.registerTask('default',['clean:build','copy:main', 'uglify', 'connect:server', 'jasmine:build']);
 };
