@@ -491,14 +491,15 @@
 
     function sendMessageToServer(logMessage, keys){
         try {
-            if (typeof (XMLHttpRequest) === "undefined") {
-                console.log("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
-                return false;
-            }
-
+            
+            var xhr = createCORSRequest(window.location.origin + '/loupe/log')
+            if(!xhr){
+                consolelog("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
+                return false;                
+            }            
+            
             consoleLog(logMessage);
-
-            var xhr = new XMLHttpRequest();
+                        
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     // finished loading
@@ -509,13 +510,12 @@
                     
                     // if the call was sucessful and we have keys to items in storage
                     // now we remove them
-                    if(xhr.status === 200 || xhr.status === 204 && keys.length){
+                    if(xhr.status >= 200 && xhr.status <= 204 && keys.length){
                         removeMessagesFromStorage(keys);
                     }
                 }
             };
-            xhr.open("POST", window.location.origin + '/loupe/log');
-            xhr.setRequestHeader("Content-type", "application/json");
+
             xhr.send(JSON.stringify(logMessage));
 
         } catch (e) {
@@ -523,6 +523,37 @@
             return false;
         }
         
+    }
+
+    function createCORSRequest(url) {
+        
+        if (typeof (XMLHttpRequest) === "undefined"){
+            return null;
+        }
+        
+      var xhr = new XMLHttpRequest();
+      if ("withCredentials" in xhr) {
+    
+        // Check if the XMLHttpRequest object has a "withCredentials" property.
+        // "withCredentials" only exists on XMLHTTPRequest2 objects.
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader("Content-type", "application/json");
+        
+      } else if (typeof XDomainRequest != "undefined") {
+    
+        // Otherwise, check if XDomainRequest.
+        // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+        xhr = new XDomainRequest();
+        xhr.contentType = "application/json";
+        xhr.open("POST", url);
+    
+      } else {
+    
+        // Otherwise, CORS is not supported by the browser.
+        xhr = null;
+    
+      }
+      return xhr;
     }
 
     function consoleLog(msg) {
