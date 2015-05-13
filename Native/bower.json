@@ -6,7 +6,7 @@
     "Gibraltar Software Inc."
   ],
   "description": "Loupe agent for Javascript",
-  "main": "dist/Loupe.Agent.Native.js",
+  "main": ["dist/Loupe.Agent.Native.js", "dist/Loupe.Agent.Native.min.js"],
   "moduleType": [
     "globals"
   ],
@@ -14,6 +14,10 @@
     "Loupe",
     "Logging"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:GibraltarSoftware/Gibraltar.Agent.Web.JavaScript.git#reboot"
+  },
   "license": "Apache License 2.0",
   "ignore": [
     "node_modules",

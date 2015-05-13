@@ -115,3 +115,6 @@ node_modules
 
 #jasmine spec runner
 _SpecRunner.html
+
+#local bower registry configuration
+.bowerrc
