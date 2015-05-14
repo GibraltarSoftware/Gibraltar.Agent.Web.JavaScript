@@ -132,7 +132,9 @@ function checkMessageStructure(message){
     expect(message['exception']).toBeDefined('exception missing');
     expect(message['methodSourceInfo']).toBeDefined('methodSourceInfo missing');
     expect(message['timeStamp']).toBeDefined('timeStamp missing');
-    expect(message['sequence']).toBeDefined('sequence missing');        
+    expect(message['sequence']).toBeDefined('sequence missing');
+    expect(message['sessionId']).toBeDefined('sessionId missing');
+    expect(message['agentSessionId']).toBeDefined('agentSessionId missing');   
 }
 
 function createTimeStamp() {

@@ -58,8 +58,14 @@
     });
 
     it('Should have client assigned session id', function(){
-        var body =common.requestBody(); 
-        expect(body.session.sessionId).toEqual(sessionId);        
+        var body = common.requestBody(); 
+        expect(body.logMessages[0].sessionId).toEqual(sessionId);        
+    })
+
+    it('Should have agent assigned session id', function(){
+        var body = common.requestBody(); 
+        var agentSessionId = loupe.clientSessionHeader().headerValue;
+        expect(body.logMessages[0].agentSessionId).toEqual(agentSessionId);        
     })
 
     function log() {

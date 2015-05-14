@@ -6,7 +6,7 @@
        
         var sequenceNumber;
         var sessionId;
-        var clientSessionId;
+        var agentSessionId;
         var messageStorage = [];
         var storageAvailable = storageSupported();
         
@@ -90,17 +90,17 @@
         function clientSessionHeader(){
             return {
                 'headerName': 'loupe-client-session',
-                'headerValue': clientSessionId
+                'headerValue': agentSessionId
             };
         }
     
         function setUpClientSessionId(){
             var currentClientSessionId = getClientSessionHeader();
             if(currentClientSessionId){
-                clientSessionId = currentClientSessionId;
+                agentSessionId = currentClientSessionId;
             } else{
-                clientSessionId = generateUUID();
-                storeClientSessionId(clientSessionId);
+                agentSessionId = generateUUID();
+                storeClientSessionId(agentSessionId);
             }
         }
     
@@ -305,10 +305,6 @@
                     logMessages: messages
                 };
                  
-                 if(sessionId){
-                     logMessage.session.sessionId = sessionId;
-                 }
-                 
                 sendMessageToServer(logMessage, keys);            
             }
         }
@@ -383,7 +379,7 @@
             if(exception){
                 exception = createExceptionFromError(exception);
             }
-                    
+
             var message = {
               severity: severity,
               category: category,
@@ -394,7 +390,9 @@
               exception: exception,
               methodSourceInfo: null,
               timeStamp: timeStamp,
-              sequence: messageSequenceNumber
+              sequence: messageSequenceNumber,
+              agentSessionId: agentSessionId,
+              sessionId: sessionId          
             };
             
             storeMessage(message);

@@ -52,6 +52,7 @@
     });
 
     it('Should have expected message structure', function () {
+        logService.setSessionId(sessionId);
         common.executeTest($scope.logMessage("Test expected message"),
                            function(requestBody){
                                 var data = JSON.parse(requestBody);
@@ -95,8 +96,20 @@
                            function(requestBody){
                                 var data = JSON.parse(requestBody);
                     
-                                expect(data.session.sessionId).toEqual(sessionId);
+                                expect(data.logMessages[0].sessionId).toEqual(sessionId);
                                 return true;                            
                            });
     });    
+    
+    it('Should have agent session Id assigned to it', function () {
+        var agentSessionId = logService.clientSessionHeader().headerValue;
+        
+        common.executeTest($scope.logMessage("Test expected message"),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data.logMessages[0].agentSessionId).toEqual(agentSessionId);
+                                return true;                            
+                           });
+    });     
 });
