@@ -18,27 +18,33 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
     };
 
     $scope.logMessage = function(logText) {
-        logService.write(logService.logMessageSeverity.information, 'test', logText,"log description",["parameter"],null,"details");
+        var methodSourceInfo = {
+            file: 'app.js',
+            line: 10,
+            column: 15
+        };
+        
+        logService.write(logService.logMessageSeverity.information, 'test', logText,"log description",["parameter"],null,"details", methodSourceInfo);
     };
     
-    $scope.information = function(caption, description, exception, details){
-        logService.information('test',caption, description,null, exception, details);
+    $scope.information = function(caption, description, exception, details, methodSourceInfo){
+        logService.information('test',caption, description,null, exception, details, methodSourceInfo);
     };
     
-    $scope.warning = function(caption, description, exception, details){
-        logService.warning('test',caption, description,null, exception, details);
+    $scope.warning = function(caption, description, exception, details, methodSourceInfo){
+        logService.warning('test',caption, description,null, exception, details, methodSourceInfo);
     };
    
-    $scope.error = function(caption, description, exception, details){
-        logService.error('test',caption, description,null, exception, details);
+    $scope.error = function(caption, description, exception, details, methodSourceInfo){
+        logService.error('test',caption, description,null, exception, details, methodSourceInfo);
     };
     
-    $scope.critical = function(caption, description, exception, details){
-        logService.critical('test',caption, description,null, exception, details);
+    $scope.critical = function(caption, description, exception, details, methodSourceInfo){
+        logService.critical('test',caption, description,null, exception, details, methodSourceInfo);
     };    
     
-    $scope.verbose = function(caption, description, exception, details){
-        logService.verbose('test',caption, description,null, exception, details);
+    $scope.verbose = function(caption, description, exception, details, methodSourceInfo){
+        logService.verbose('test',caption, description,null, exception, details, methodSourceInfo);
     };      
 }]);
 

@@ -68,8 +68,21 @@
         expect(body.logMessages[0].agentSessionId).toEqual(agentSessionId);        
     })
 
+    it('Should have expected method source info', function () {
+       var body = common.requestBody(); 
+       var msi = body.logMessages[0].methodSourceInfo;
+       expect(msi).not.toBeUndefined();
+       expect(msi.file).toEqual('a file');
+    });
+
     function log() {
-        loupe.write(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'],null, 'with details');
+        var methodSourceInfo = {
+            file: 'a file',
+            line: 18,
+            column: 1
+        };
+        
+        loupe.write(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'],null, 'with details', methodSourceInfo);
     }
 
     function requestComplete(done) {

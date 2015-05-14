@@ -80,11 +80,12 @@
         return  parameter;
     }
 
-    function write(severity, category, caption, description, parameters, exception, details) {        
+    function write(severity, category, caption, description, parameters, exception, details, methodSourceInfo) {        
         exception = sanitiseArgument(exception);
         details = sanitiseArgument(details);
+        methodSourceInfo = sanitiseArgument(methodSourceInfo);
         
-        createMessage(severity,category, caption, description, parameters, exception, details, null);
+        createMessage(severity,category, caption, description, parameters, exception, details, methodSourceInfo);
         
         addSendMessageCommandToEventQueue();
     }
@@ -362,7 +363,7 @@
           parameters: parameters,
           details: details,
           exception: exception,
-          methodSourceInfo: null,
+          methodSourceInfo: methodSourceInfo,
           timeStamp: timeStamp,
           sequence: messageSequenceNumber,
           agentSessionId: agentSessionId,

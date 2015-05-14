@@ -111,5 +111,17 @@
                                 expect(data.logMessages[0].agentSessionId).toEqual(agentSessionId);
                                 return true;                            
                            });
-    });     
+    });
+
+    it('Should have method source info', function () {
+        common.executeTest($scope.logMessage("Test expected message"),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                                var msi = data.logMessages[0].methodSourceInfo;
+                                expect(msi.file).toEqual('app.js');
+                                expect(msi.line).toEqual(10);
+                                expect(msi.column).toEqual(15);
+                                return true;                            
+                           });
+    });         
 });
