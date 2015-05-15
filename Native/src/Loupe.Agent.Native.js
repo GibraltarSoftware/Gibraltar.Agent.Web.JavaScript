@@ -214,16 +214,22 @@
 
     function logError(msg, url, line, column, error) {
 
+        var errorName = "";
+
+        if(error){
+            errorName = error.name || "Exception";    
+        }
+       
         var exception = {
             message: msg,
             url: url,
             stackTrace: getStackTrace(error, msg),
-            cause: "",
+            cause: errorName,
             line: line,
             column: column            
         };
-
-        createMessage(loupe.logMessageSeverity.error,"JavaScript","","",null,exception,null,null);
+        
+        createMessage(loupe.logMessageSeverity.error,"JavaScript",errorName,"",null,exception,null,null);
 
         return logMessageToServer();
     }
@@ -351,9 +357,9 @@
         
         var timeStamp = createTimeStamp();
         
-       if(exception){
-        exception = createExceptionFromError(exception);
-       }
+        if(exception){
+            exception = createExceptionFromError(exception);
+        }
         
         var message = {
           severity: severity,
@@ -388,6 +394,19 @@
 
     function createExceptionFromError(error, cause){
         
+        // if error has simply been passed through as a string
+        // log the best we could
+        if(typeof error == "string"){
+            return {
+                message: error,
+                url: window.location.href,
+                stackTrace: [],
+                cause: cause || "",
+                line: null,
+                column: null                        
+            }; 
+        }
+        
         // if the object has an Url property
         // its one of our exception objects so just
         // return it
@@ -400,8 +419,8 @@
                 url: window.location.href,
                 stackTrace: error.stackTrace,
                 cause: cause || "",
-                line: error.lineNumber,
-                column: error.columnNumber,                        
+                line: error.lineNumber || null,
+                column: error.columnNumber || null,                        
             };            
     }
 
