@@ -39,11 +39,18 @@
             critical: critical,
             logMessageSeverity: logMessageSeverity,
             setSessionId: setSessionId,
-            clientSessionHeader: clientSessionHeader            
+            clientSessionHeader: clientSessionHeader,
+            MethodSourceInfo: MethodSourceInfo    
         };
         
         return  logService;
 
+        function MethodSourceInfo (file, method, line, column){
+            this.file = file || null;
+            this.method = method || null;
+            this.line = line || null;
+            this.column = column || null;
+        };
 
         function partial(fn /*, args...*/) {
           // A reference to the Array#slice method.
@@ -371,6 +378,10 @@
             }
         }
 
+        function buildMessageSourceInfo(data){
+            return new MethodSourceInfo(data.file || null, data.method || null, data.line || null, data.column || null) ;
+        }
+
         function createMessage(severity, category, caption, description, parameters, details, exception, methodSourceInfo){
             var messageSequenceNumber = getNextSequenceNumber();
             
@@ -380,6 +391,10 @@
                 exception = createExceptionFromError(exception);
             }
 
+            if(methodSourceInfo && !(methodSourceInfo instanceof MethodSourceInfo)){
+               methodSourceInfo = buildMessageSourceInfo(methodSourceInfo);
+            }
+            
             var message = {
               severity: severity,
               category: category,
