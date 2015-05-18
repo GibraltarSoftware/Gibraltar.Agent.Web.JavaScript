@@ -261,7 +261,7 @@
 
     function clientSessionHeader(){
         return {
-            'headerName': 'loupe-client-session',
+            'headerName': 'loupe-agent-sessionId',
             'headerValue': agentSessionId
         };
     }
@@ -279,7 +279,7 @@
     function storeClientSessionId(sessionIdToStore){
         if(storageAvailable){
             try{
-                sessionStorage.setItem("LoupeClientSessionId", sessionIdToStore)
+                sessionStorage.setItem("LoupeAgentSessionId", sessionIdToStore)
             } catch(e){
                 consoleLog("Unable to store clientSessionId in session storage. " + e.message);
             }
@@ -288,7 +288,7 @@
 
     function getClientSessionHeader(){
         try {
-            var clientSessionId = sessionStorage.getItem("LoupeClientSessionId");
+            var clientSessionId = sessionStorage.getItem("LoupeAgentSessionId");
             if(clientSessionId){
                 return clientSessionId;
             } 

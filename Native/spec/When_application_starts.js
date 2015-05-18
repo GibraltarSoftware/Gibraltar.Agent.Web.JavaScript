@@ -7,7 +7,7 @@
     it('Should have client session header', function(){
         var headerObject = loupe.clientSessionHeader();
         expect(headerObject).not.toBeNull();
-        expect(headerObject.headerName).toEqual("loupe-client-session");
+        expect(headerObject.headerName).toEqual("loupe-agent-sessionId");
         expect(headerObject.headerValue).not.toEqual(""); 
     });
 });

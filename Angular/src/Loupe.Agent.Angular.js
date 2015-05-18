@@ -96,7 +96,7 @@
 
         function clientSessionHeader(){
             return {
-                'headerName': 'loupe-client-session',
+                'headerName': 'loupe-agent-sessionId',
                 'headerValue': agentSessionId
             };
         }
