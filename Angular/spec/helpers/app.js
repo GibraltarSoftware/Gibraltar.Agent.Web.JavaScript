@@ -18,11 +18,8 @@ app.controller('TestCtrl', ["$scope", "$exceptionHandler", "loupe.logService", f
     };
 
     $scope.logMessage = function(logText) {
-        var methodSourceInfo = {
-            file: 'app.js',
-            line: 10,
-            column: 15
-        };
+        
+        var methodSourceInfo = new logService.MethodSourceInfo('app.js','theFunction',10,15);
         
         logService.write(logService.logMessageSeverity.information, 'test', logText,"log description",["parameter"],null,"details", methodSourceInfo);
     };

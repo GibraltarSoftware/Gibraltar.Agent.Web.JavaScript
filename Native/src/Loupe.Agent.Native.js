@@ -47,6 +47,12 @@
         clientSessionHeader: clientSessionHeader
     };
 
+    window.loupe.MethodSourceInfo = function (file, method, line, column){
+        this.file = file || null;
+        this.method = method || null;
+        this.line = line || null;
+        this.column = column || null;
+    };
 
     function addSendMessageCommandToEventQueue(){
         // check for unsent messages on start up
@@ -80,10 +86,18 @@
         return  parameter;
     }
 
+    function buildMessageSourceInfo(data){
+        return new loupe.MethodSourceInfo(data.file || null, data.method || null, data.line || null, data.column || null) ;
+    }
+
     function write(severity, category, caption, description, parameters, exception, details, methodSourceInfo) {        
         exception = sanitiseArgument(exception);
         details = sanitiseArgument(details);
         methodSourceInfo = sanitiseArgument(methodSourceInfo);
+        
+        if(methodSourceInfo && !(methodSourceInfo instanceof loupe.MethodSourceInfo)){
+            methodSourceInfo = buildMessageSourceInfo(methodSourceInfo);
+        }
         
         createMessage(severity,category, caption, description, parameters, exception, details, methodSourceInfo);
         

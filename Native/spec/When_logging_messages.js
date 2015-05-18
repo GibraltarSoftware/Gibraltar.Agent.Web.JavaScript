@@ -73,15 +73,15 @@
        var msi = body.logMessages[0].methodSourceInfo;
        expect(msi).not.toBeUndefined();
        expect(msi.file).toEqual('a file');
+       expect(msi.method).toEqual('theFunction');
+       expect(msi.line).toEqual(18);
+       expect(msi.column).toEqual(1);
     });
 
     function log() {
-        var methodSourceInfo = {
-            file: 'a file',
-            line: 18,
-            column: 1
-        };
         
+        var methodSourceInfo = new loupe.MethodSourceInfo('a file','theFunction',18,1);
+
         loupe.write(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'],null, 'with details', methodSourceInfo);
     }
 
