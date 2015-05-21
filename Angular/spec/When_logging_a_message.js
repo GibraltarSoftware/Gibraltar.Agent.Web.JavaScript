@@ -60,12 +60,25 @@
                                 expect(data['session']).toBeDefined('session missing');
                                 var session = data.session;
                                 expect(session['client']).toBeDefined('client details missing');
+                                expect(session['currentAgentSessionId']).toBeDefined('currentAgentSessionId missing');
                                 checkClientMessageStructure(session.client);
                                 
                                 expect(data['logMessages']).toBeDefined('log messages missing');
                                 checkMessageStructure(data.logMessages[0]);
                                 
                                 return true;                          
+                           });
+    });
+
+    it('Should have current agentSessionId', function () {
+        var agentSessionId = logService.clientSessionHeader().headerValue;
+                
+        common.executeTest($scope.logMessage("Test expected message"),
+                           function(requestBody){
+                                var data = JSON.parse(requestBody);
+                    
+                                expect(data.session.currentAgentSessionId).toEqual(agentSessionId);
+                                return true;                            
                            });
     });
 

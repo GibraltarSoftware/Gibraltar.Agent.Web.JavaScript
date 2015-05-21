@@ -307,7 +307,8 @@
             if(messages.length) {
                 var logMessage = {
                     session: {
-                       client: platformService.platform()
+                       client: platformService.platform(),
+                       currentAgentSessionId: agentSessionId
                     },
                     logMessages: messages
                 };

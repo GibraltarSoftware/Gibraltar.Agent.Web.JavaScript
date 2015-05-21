@@ -36,12 +36,20 @@
         expect(body['logMessages']).toBeDefined();
         
         expect(body.session['client']).toBeDefined();
+        expect(body.session.currentAgentSessionId).toBeDefined();
         
         checkClientMessageStructure(body.session.client);
         
         expect(body.logMessages[0]).toBeDefined();
         checkMessageStructure(body.logMessages[0]);
         
+    });
+
+    it('Should have current agent session Id', function () {
+        var body =common.requestBody();
+        var agentSessionId = loupe.clientSessionHeader().headerValue;
+        
+        expect(body.session.currentAgentSessionId).toEqual(agentSessionId);
     });
 
     it('Should have timestamp', function(){

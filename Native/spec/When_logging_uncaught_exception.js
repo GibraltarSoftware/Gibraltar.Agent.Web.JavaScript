@@ -29,6 +29,7 @@
     it('Should have expected structure', function () {
         var body = common.requestBody();     
         expect(body.session['client']).toBeDefined();
+        expect(body.session.currentAgentSessionId).toBeDefined();
         
         checkClientMessageStructure(body.session.client);
         
@@ -36,6 +37,13 @@
         checkMessageStructure(body.logMessages[0]);
         
         checkExceptionStructure(body.logMessages[0].exception);           
+    });
+
+    it('Should have current agent session Id', function () {
+        var body =common.requestBody();
+        var agentSessionId = loupe.clientSessionHeader().headerValue;
+        
+        expect(body.session.currentAgentSessionId).toEqual(agentSessionId);
     });
 
     function checkExceptionStructure(exception){
