@@ -532,10 +532,11 @@
         try {
             
             var origin = corsOrigin || window.location.origin;
+            origin = stripTrailingSlash(origin);
             
             var xhr = createCORSRequest(origin + '/loupe/log')
             if(!xhr){
-                consolelog("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
+                consoleLog("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
                 return false;                
             }            
             
@@ -545,8 +546,8 @@
                 if (xhr.readyState === 4) {
                     // finished loading
                     if (xhr.status < 200 || xhr.status > 206) {
-                        console.log("Loupe JavaScript Logger: Failed to log to " + window.location.origin + '/loupe/log');
-                        console.log("  Status: " + xhr.status + ": " + xhr.statusText);
+                        consoleLog("Loupe JavaScript Logger: Failed to log to " + window.location.origin + '/loupe/log');
+                        consoleLog("  Status: " + xhr.status + ": " + xhr.statusText);
                     }
                     
                     // if the call was sucessful and we have keys to items in storage
@@ -565,6 +566,11 @@
         }
         
     }
+
+    function stripTrailingSlash(origin)     
+    {     
+        return origin.replace(/\/$/, "");
+    } 
 
     function createCORSRequest(url) {
         
