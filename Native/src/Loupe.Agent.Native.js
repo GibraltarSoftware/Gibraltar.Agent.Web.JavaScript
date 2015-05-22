@@ -9,6 +9,7 @@
     var agentSessionId;
     var messageStorage = [];
     var storageAvailable = storageSupported();
+    var corsOrigin=null;
     
     var logMessageSeverity = {
         none: 0,
@@ -44,7 +45,8 @@
         setSessionId: setSessionId,
         propagateOnError: propagateError,
         logMessageSeverity: logMessageSeverity,
-        clientSessionHeader: clientSessionHeader
+        clientSessionHeader: clientSessionHeader,
+        corsOrigin: setCORSOrigin
     };
 
     window.loupe.MethodSourceInfo = function (file, method, line, column){
@@ -63,6 +65,10 @@
 
     function setSessionId(value){
         sessionId = value;
+    }
+
+    function setCORSOrigin(value){
+        corsOrigin = value;
     }
 
     function partial(fn /*, args...*/) {
@@ -525,7 +531,9 @@
     function sendMessageToServer(logMessage, keys){
         try {
             
-            var xhr = createCORSRequest(window.location.origin + '/loupe/log')
+            var origin = corsOrigin || window.location.origin;
+            
+            var xhr = createCORSRequest(origin + '/loupe/log')
             if(!xhr){
                 consolelog("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
                 return false;                
