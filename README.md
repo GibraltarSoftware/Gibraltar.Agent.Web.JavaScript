@@ -26,12 +26,18 @@ the functionality the agents support and how to use it.
 Building the Agent
 ------------------
 
-This project is designed for use with Visual Studio 2012 with NuGet package restore enabled.
-When you build it the first time it will retrieve dependencies from NuGet.
+The agents have been built using node, npm and grunt.
+
+You will need to have installed Node (version > 0.10), which will also mean you will have npm, and then install grunt using npm with
+the command `npm install -g grunt-cli`.
+
+First clone the repo to your local machine then open a command prompt at the respective agent folder e.g. C:\Github\Gibraltar.Agent.Web.JavaScript\Native, issue
+the command `npm install` this will then install all the necessary modules to be able to build the agent.
+
+Once npm install has finished if you run `grunt test` it will execute the jasmine specs so you can be sure that the code is working as expected.
 
 Contributing
 ------------
 
 Feel free to branch this project and contribute a pull request to the development branch. 
-If your changes are incorporated into the master version they'll be published out to NuGet for
-everyone to use!
+If your changes are incorporated into the master version they'll be published out for everyone to use!
