@@ -14,19 +14,19 @@ module.exports = function(grunt){
 			debug: '_SpecRunner.html'
 		},
 		jshint: {
-			all:['src/Loupe.Agent.Angular.js']
+			all:['src/Loupe.Angular.Agent.js']
 		},
 		copy: {
 			main: {
 				files: [
-					{ src:  ['src/Loupe.Agent.Angular.js'], dest: 'dist/Loupe.Agent.Angular.js'},
+					{ src:  ['src/Loupe.Angular.Agent.js'], dest: 'dist/Loupe.Angular.Agent.js'},
 				]
 			}
 		},			
 		uglify: {
 			build: {
 				files: {
-					'dist/Loupe.Agent.Angular.min.js': ['dist/Loupe.Agent.Angular.js']
+					'dist/Loupe.Angular.Agent.min.js': ['dist/Loupe.Angular.Agent.js']
 				}
 			}
 		},
@@ -56,16 +56,16 @@ module.exports = function(grunt){
 							 'spec/vendor/platform.js']				
 			},
 			unit: {
-				src: 'src/Loupe.Agent.Angular.js',
+				src: 'src/Loupe.Angular.Agent.js',
 			},
 			debug: {
-				src: 'src/Loupe.Agent.Angular.js',
+				src: 'src/Loupe.Angular.Agent.js',
 				options : {
 					keepRunner: true
 				}
 			},			
 			build: {
-				src: 'dist/Loupe.Agent.Angular.min.js',
+				src: 'dist/Loupe.Angular.Agent.min.js',
 				options : {
 			        template : require('grunt-template-jasmine-istanbul'),
 			        templateOptions: {
@@ -77,7 +77,7 @@ module.exports = function(grunt){
 		},
 		watch: {
 			scripts: {
-				files: ['src/Loupe.Agent.Angular.js', 'spec/*.js','spec/helpers/app.js'],
+				files: ['src/Loupe.Angular.Agent.js', 'spec/*.js','spec/helpers/app.js'],
 				tasks: 'test'
 			}
 		}			

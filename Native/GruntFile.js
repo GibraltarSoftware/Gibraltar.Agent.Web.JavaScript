@@ -15,12 +15,12 @@ module.exports = function(grunt){
 			test: 'node_modules/grunt-contrib-jasmine/tasks/jasmine.js'
 		},
 		jshint: {
-			all:['src/Loupe.Agent.Native.js']
+			all:['src/Loupe.JavaScript.Agent.js']
 		},
 		copy: {
 			main: {
 				files: [
-					{ src:  ['src/Loupe.Agent.Native.js'], dest: 'dist/Loupe.Agent.Native.js'},
+					{ src:  ['src/Loupe.JavaScript.Agent.js'], dest: 'dist/Loupe.JavaScript.Agent.js'},
 					{ src: ['custom_jasmine_grunt_task/jasmine.js'], dest:'node_modules/grunt-contrib-jasmine/tasks/jasmine.js'}
 				]
 			},
@@ -31,7 +31,7 @@ module.exports = function(grunt){
 		uglify: {
 			build: {
 				files: {
-					'dist/Loupe.Agent.Native.min.js': ['dist/Loupe.Agent.Native.js']
+					'dist/Loupe.JavaScript.Agent.min.js': ['dist/Loupe.JavaScript.Agent.js']
 				}
 			},
 		},
@@ -59,16 +59,16 @@ module.exports = function(grunt){
 					outputTrace: false,					
 			},
 			unit: {
-				src: 'src/Loupe.Agent.Native.js'
+				src: 'src/Loupe.JavaScript.Agent.js'
 			},
 			debug: {
-				src: 'src/Loupe.Agent.Native.js',
+				src: 'src/Loupe.JavaScript.Agent.js',
 				options: {
 					keepRunner: true
 				}
 			},
 			build: {
-				src: 'dist/Loupe.Agent.Native.min.js',
+				src: 'dist/Loupe.JavaScript.Agent.min.js',
 				options : {
 			        template : require('grunt-template-jasmine-istanbul'),
 			        templateOptions: {
@@ -80,7 +80,7 @@ module.exports = function(grunt){
 		},
 		watch: {
 			scripts: {
-				files: ['src/Loupe.Agent.Native.js', 'spec/*.js'],
+				files: ['src/Loupe.JavaScript.Agent.js', 'spec/*.js'],
 				tasks: 'test'
 			}
 		}		

@@ -1,12 +1,12 @@
 {
-  "name": "Loupe.Agent.Native",
+  "name": "Loupe.JavaScript.Agent",
   "version": "0.1.0",
   "homepage": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript",
   "authors": [
     "Gibraltar Software Inc."
   ],
   "description": "Loupe agent for Javascript",
-  "main": ["dist/Loupe.Agent.Native.js", "dist/Loupe.Agent.Native.min.js"],
+  "main": ["Native/dist/Loupe.JavaScript.Agent.js", "Native/dist/Loupe.JavaScript.Agent.min.js"],
   "moduleType": [
     "globals"
   ],
@@ -16,7 +16,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:GibraltarSoftware/Gibraltar.Agent.Web.JavaScript.git#reboot"
+    "url": "git@github.com:GibraltarSoftware/Gibraltar.Agent.Web.JavaScript.git"
   },
   "license": "Apache License 2.0",
   "ignore": [
