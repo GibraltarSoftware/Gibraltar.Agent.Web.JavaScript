@@ -1,0 +1,40 @@
+{
+  "name": "Loupe.JavaScript.Agent",
+  "version": "0.1.0",
+  "homepage": "https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript",
+  "authors": [
+    "Gibraltar Software Inc."
+  ],
+  "description": "Loupe agent for Javascript",
+  "main": ["Native/dist/Loupe.JavaScript.Agent.js", "Native/dist/Loupe.JavaScript.Agent.min.js"],
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "Loupe",
+    "Logging"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:GibraltarSoftware/Gibraltar.Agent.Web.JavaScript.git"
+  },
+  "license": "Apache License 2.0",
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "spec",
+    "reports",
+    "src",
+    "custom_jasmine_grunt_task",
+    ".bowerrc",
+    ".gitignore",
+    ".gitattributes",
+    "README.md",
+    "GruntFile.js",
+    "bower.json",
+    "pacakge.json",
+    "LICENSE.txt"
+  ]
+}
