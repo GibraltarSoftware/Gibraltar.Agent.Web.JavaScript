@@ -1,30 +1,32 @@
 Loupe Agent for JavaScript
 ==========================
 
-These agents bring a lot of the Loupe Agent functionality to JavaScript and Angular, handling uncaught exceptions and allowing you to 
-log messages from your JavaScript client in Loupe.
+Loupe has 2 JavaScript agents:
 
-These agents provide additonal functionality allowing you to correlate the actions your user performs client side with the corresponding
-server side processing.
+ * A native JavaScript agent which uses vanilla JavaScript with no dependencies on any frameworks
+ * An Angular 1.x agent which has been designed to work specifically with Angular 
 
-If you don't need to modify the source code just download the latest [Loupe Agent for JavaScript and WebAPI]().
-It extends the [Loupe Agent for ASP.NET MVC](http://www.nuget.org/packages/Gibraltar.Agent.Web.Mvc/) so you can
-use any viewer for Loupe to review the angent's information.
+These agents bring a lot of the familiar Loupe Agent functionality to client side logging, recording uncaught exceptions and allowing you to 
+log messages from your JavaScript code to Loupe.
 
-Using the Agent
+When combined with the [Loupe Agent for ASP.NET MVC](http://www.nuget.org/packages/Gibraltar.Agent.Web.Mvc/) or [Loupe Agent for ASP.NET WebForms](https://www.nuget.org/packages/Gibraltar.Agent.Web/) 
+these agents will allow you to correlate the actions your user performs client side with the corresponding server side processing giving you a better insight into end to end functionality.
+
+Using an Agent
 ---------------
-To use one of these agents you need to include the required script from the dist folder from either [Native](https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/tree/reboot/Native/dist) 
-or [Angular](https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/tree/reboot/Angular/dist) depending on which agent you require.
+To use one of these agents you need to include the required script from the dist folder from either [Native](https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/tree/master/Native/dist) 
+or [Angular](https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/tree/master/Angular/dist) depending on which agent you require.
 
-To enable the JavaScript agent to log to loupe you will need to use the [Loupe.Web.Module](https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.Module) which handles
-the server side interaction so that you do not need to alter your code.
+The agents are designed to send log information to a server which handles logging to a Loupe server; if you are using ASP.Net (MVC or WebForms) & IIS you can use the 
+[Loupe.Web.Module](https://www.nuget.org/packages/Loupe.Agent.Web.Module/) which will handle all of the server side interaction for you. 
 
+If you are not using ASP.Net & IIS you will need to create your own endpoint for receiving the messages and if this is something you want to do please reach out to us so we can help with message formats, etc
 
 To get more information on how the agents work head to the [wiki](https://github.com/GibraltarSoftware/Gibraltar.Agent.Web.JavaScript/wiki) which explains
 the functionality the agents support and how to use it.
 
-Building the Agent
-------------------
+Building the Agent from source
+------------------------------
 
 The agents have been built using node, npm and grunt.
 
