@@ -40,31 +40,30 @@ describe("When fails to log to server", function(){
 	
     it('Should send all messages in local storage', inject(function($httpBackend, $timeout){
         var data;
-        $httpBackend.when('POST',expectedUrl, function(requestBody){
-            data = JSON.parse(requestBody);
-            return true;
-        }).respond(function(method, url, data, headers){
-            // first call return 500 so message not removed
-            // from localStorage
-            if(localStorage.length === 1){
-                return [500, {}, {}];
-            } else {
-                return [200, {}, {}];
-            }
-        });
-        
+        $httpBackend.when('POST',expectedUrl).respond(200);
+        for (var index = 0; index < 20; index++) {
+            var message = {
+                sequence: null
+            };
+            message.sequence = index
+            
+            localStorage.setItem("Loupe-message-" + index, JSON.stringify(message))
+        }
+
         $scope.logMessage("1st message");
         $timeout.flush();
         $httpBackend.flush();
-        expect(localStorage.length).toEqual(1);	  
+        expect(localStorage.length).toEqual(11);	  
        
-        $scope.logMessage("2nd message");        
         $timeout.flush();
         $httpBackend.flush();
-                
+        expect(localStorage.length).toEqual(1);
+       
+
+        $timeout.flush();
+        $httpBackend.flush();
         expect(localStorage.length).toEqual(0);
-		expect(data.logMessages[0].caption).toEqual('1st message');
-		expect(data.logMessages[1].caption).toEqual('2nd message');           
+     
     }));
     
     it('Should only remove items from localStorage for loupe', inject(function($httpBackend, $timeout){

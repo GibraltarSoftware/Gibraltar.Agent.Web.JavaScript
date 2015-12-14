@@ -10,6 +10,7 @@
     var messageStorage = [];
     var storageAvailable = storageSupported();
     var corsOrigin=null;
+    var globalKeyList=[];
     
     var logMessageSeverity = {
         none: 0,
@@ -477,27 +478,58 @@
     function getMessagesToSend(){
         var messages=[];
         var keys =[];
-        
+        var moreMessagesInStorage=false;
+        var messagesFromStorage = [];
+
         if(messageStorage.length){
-            messages = messageStorage.slice();
+            messagesFromStorage = messageStorage.slice();
             messageStorage.length = 0;
         } 
         
         if(storageAvailable){
-            // look for messages in localStorage and add to messages array
-    		for(var i=0; i < localStorage.length; i++){
-    			if(localStorage.key(i).indexOf('Loupe-message-') > -1){
-                    keys.push(localStorage.key(i));
-    				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
-    			}
-    		}
-            // sort the messages by their sequence
-            if(messages.length && messages.length > 1){
-                messages.sort(function(a,b){return a.sequence - b.sequence;});
+                            
+            for(var i=0; i < localStorage.length; i++){
+                
+                if(localStorage.key(i).indexOf('Loupe-message-') > -1){
+                    
+                    if(globalKeyList.indexOf(localStorage.key(i)) === -1){                        
+                        messagesFromStorage.push({
+                            key: localStorage.key(i), 
+                            message: JSON.parse(localStorage.getItem(localStorage.key(i)))
+                        });	
+                    }
+                }
             }
         }
         
-        return [messages, keys];
+        if(messagesFromStorage.length && messagesFromStorage.length > 1){
+            messagesFromStorage.sort(function(a,b){return a.message.sequence - b.message.sequence;});
+        }      
+        
+        if(messagesFromStorage.length > 10){
+            moreMessagesInStorage = true;
+            messagesFromStorage = messagesFromStorage.splice(0,10);
+        }                
+        
+        for (var index = 0; index < messagesFromStorage.length; index++) {
+            messages.push(messagesFromStorage[index].message);
+            keys.push(messagesFromStorage[index].key);
+        }
+        
+        // add keys to the global key list to ensure we don't pick up
+        // these keys again
+        Array.prototype.push.apply(globalKeyList, keys); 
+        
+        
+        return [messages, keys, moreMessagesInStorage];
+    }
+
+    function removeKeysFromGlobalList(keys){
+        // remove these keys from our global key list 
+        if(globalKeyList.length){
+            var position = globalKeyList.indexOf(keys[0]);
+            globalKeyList.splice(position, keys.length);
+        }                  
     }
 
     function removeMessagesFromStorage(keys){
@@ -514,17 +546,22 @@
         var messageDetails = getMessagesToSend();        
         var messages = messageDetails[0];
         var keys = messageDetails[1];
+        var messagesStillInStorage = messageDetails[2];
         
         if(messages.length) {
             var logMessage = {
                 session: {
-                   client: getPlatform(),
-                   currentAgentSessionId: agentSessionId
+                    client: getPlatform(),
+                    currentAgentSessionId: agentSessionId
                 },
                 logMessages: messages
             };
-             
+                
             sendMessageToServer(logMessage, keys);            
+        }
+        
+        if(messagesStillInStorage === true){
+            addSendMessageCommandToEventQueue()
         }
     }
 
@@ -546,6 +583,8 @@
                 if (xhr.readyState === 4) {
                     // finished loading
                     if (xhr.status < 200 || xhr.status > 206) {
+                        // remove the keys from the list so they can be sent again
+                        removeKeysFromGlobalList(keys);
                         consoleLog("Loupe JavaScript Logger: Failed to log to " + window.location.origin + '/loupe/log');
                         consoleLog("  Status: " + xhr.status + ": " + xhr.statusText);
                     }

@@ -9,6 +9,7 @@
         var agentSessionId;
         var messageStorage = [];
         var storageAvailable = storageSupported();
+        var globalKeyList=[];
         
         var logMessageSeverity = {
             none: 0,
@@ -116,7 +117,7 @@
                 try{
                     sessionStorage.setItem("LoupeClientSessionId", sessionIdToStore)
                 } catch(e){
-                    consoleLog("Unable to store clientSessionId in session storage. " + e.message);
+                    $log.log("Unable to store clientSessionId in session storage. " + e.message);
                 }
             }
         }
@@ -128,7 +129,7 @@
                     return clientSessionId;
                 } 
             } catch (e) {
-                consoleLog("Unable to retrieve clientSessionId number from session storage. " + e.message);
+                $log.log("Unable to retrieve clientSessionId number from session storage. " + e.message);
             }
             
             return null;      
@@ -288,6 +289,13 @@
             return null;
         }
 
+        function removeKeysFromGlobalList(keys){
+            // remove these keys from our global key list 
+            if(globalKeyList.length){
+                var position = globalKeyList.indexOf(keys[0]);
+                globalKeyList.splice(position, keys.length);
+            }                  
+        }
 
         function removeMessagesFromStorage(keys){
             for(var i=0; i < keys.length; i++){
@@ -297,12 +305,15 @@
                   $log.log("Unable to remove message from localStorage: " + e.message);
               }
             }
+            
+            removeKeysFromGlobalList(keys);
         }
 
         function logMessageToServer() {
             var messageDetails = getMessagesToSend();        
             var messages = messageDetails[0];
             var keys = messageDetails[1];
+            var messagesStillInStorage = messageDetails[2];
             
             if(messages.length) {
                 var logMessage = {
@@ -315,6 +326,10 @@
                  
                 sendMessageToServer(logMessage, keys);            
             }
+            
+            if(messagesStillInStorage){
+                addSendMessageCommandToEventQueue();
+            }
         }
 
         function sendMessageToServer(logMessage, keys){
@@ -326,6 +341,8 @@
                     }
                 })
                 .error(function logMessageError(data, status, headers, config) {
+                    // remove the keys from the list so they can be sent again
+                    removeKeysFromGlobalList(keys);
                     $log.warn("Loupe Angular Logger: Exception while attempting to log");
                     $log.log("  status: " + status);
                     $log.log("  data: " + data);
@@ -477,27 +494,50 @@
         function getMessagesToSend(){
             var messages=[];
             var keys =[];
+            var moreMessagesInStorage=false;
+            var messagesFromStorage = [];
             
             if(messageStorage.length){
-                messages = messageStorage.slice();
+                messagesFromStorage = messageStorage.slice();
                 messageStorage.length = 0;
             } 
             
             if(storageAvailable){
-                
+                                
         		for(var i=0; i < localStorage.length; i++){
+                    
         			if(localStorage.key(i).indexOf('Loupe-message-') > -1){
-                        keys.push(localStorage.key(i));
-        				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
+                        
+                        if(globalKeyList.indexOf(localStorage.key(i)) === -1){                        
+                            messagesFromStorage.push({
+                                key: localStorage.key(i), 
+                                message: JSON.parse(localStorage.getItem(localStorage.key(i)))
+                            });	
+                        }
         			}
         		}
+            }
                 
-                if(messages.length && messages.length > 1){
-                    messages.sort(function(a,b){return a.sequence - b.sequence;});
-                }                
+            if(messagesFromStorage.length && messagesFromStorage.length > 1){
+                messagesFromStorage.sort(function(a,b){return a.message.sequence - b.message.sequence;});
+            }      
+            
+            if(messagesFromStorage.length > 10){
+                moreMessagesInStorage = true;
+                messagesFromStorage = messagesFromStorage.splice(0,10);
+            }                
+            
+            for (var index = 0; index < messagesFromStorage.length; index++) {
+                messages.push(messagesFromStorage[index].message);
+                keys.push(messagesFromStorage[index].key);
             }
             
-            return [messages, keys];
+            // add keys to the global key list to ensure we don't pick up
+            // these keys again
+            Array.prototype.push.apply(globalKeyList, keys); 
+            
+            
+            return [messages, keys, moreMessagesInStorage];
         }
 
         function sanitiseArgument(parameter){
@@ -2161,11 +2201,13 @@
     .config(["$provide", function ($provide) {
         // extend the error logging
         $provide.decorator("$exceptionHandler", [
-            "$delegate", "loupe.logService", function ($delegate, loupeLogService) {
+            "$delegate", "$injector", function ($delegate, $injector) {
                 return function (exception, cause) {
                     // Calls the original $exceptionHandler.
                     $delegate(exception, cause);
 
+					var loupeLogService = $injector.get("loupe.logService");
+                    
                     // Custom error handling code here.
                     loupeLogService.exception(exception, cause);
                 };

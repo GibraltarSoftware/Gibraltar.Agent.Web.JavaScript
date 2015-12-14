@@ -27,29 +27,32 @@ describe("When fails to log with server", function(){
 	});
 	
 	it('Should send all messages in local storage', function(done){
-		messageFn.setResponseCodes([500,200]);
-		loupe.information('test', '1st message');
+		messageFn.setResponseCodes([200,200, 200]);
+        for (var index = 0; index < 20; index++) {
+            var message = {
+                sequence: null
+            };
+            message.sequence = index
+            
+            localStorage.setItem("Loupe-message-" + index, JSON.stringify(message))
+        }
+
+		loupe.information('test', 'test logs message','test log description');
 
 		messageFn.waitToBeLogged(function() {    
-			expect(localStorage.length).toEqual(1);
+			expect(localStorage.length).toEqual(11);
+			
 			common.requests().length=0;
 
-			loupe.information('test', '2nd message');
-			
 			messageFn.waitToBeLogged(function() {    
-	            var data = messageFn.getRequestBody();
+				expect(localStorage.length).toEqual(1);		
+				common.requests().length=0;
 				
-				expect(data.logMessages.length).toEqual(2);
-				
-				expect(data.logMessages[0].caption).toEqual('1st message');
-				expect(data.logMessages[1].caption).toEqual('2nd message');
-				
-				done();
-			});			
-		});
-			
-
+				done();	
+			});
+		});		
 	});
+
 	
     it('Should only remove items from localStorage for loupe', function(done){
         localStorage.setItem("myItem","a value");

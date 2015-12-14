@@ -18,4 +18,5 @@ describe('When agent created', function(){
         expect(headerObject.headerName).toEqual("loupe-agent-sessionId");
         expect(headerObject.headerValue).not.toEqual(""); 
     });
+    
 });
