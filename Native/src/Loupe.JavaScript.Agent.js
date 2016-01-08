@@ -641,7 +641,7 @@
         
         // if we have an auth header then add it to the request
         if(authHeader){
-            xhr.setRequestHeader(authHeader);
+            xhr.setRequestHeader(authHeader.name, authHeader.value);
         }
         
       } else if (typeof XDomainRequest != "undefined") {
