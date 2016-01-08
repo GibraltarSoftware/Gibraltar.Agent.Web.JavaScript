@@ -11,6 +11,7 @@
     var storageAvailable = storageSupported();
     var corsOrigin=null;
     var globalKeyList=[];
+    var authHeader;
     
     var logMessageSeverity = {
         none: 0,
@@ -47,7 +48,8 @@
         propagateOnError: propagateError,
         logMessageSeverity: logMessageSeverity,
         clientSessionHeader: clientSessionHeader,
-        corsOrigin: setCORSOrigin
+        corsOrigin: setCORSOrigin,
+        setAuthorizationHeader : setAuthorizationHeader
     };
 
     window.loupe.MethodSourceInfo = function (file, method, line, column){
@@ -70,6 +72,18 @@
 
     function setCORSOrigin(value){
         corsOrigin = value;
+    }
+
+    function setAuthorizationHeader(header){
+        if(header){
+            if(header.name && header.value){
+                authHeader = header;
+            } else {
+                consoleLog("setAuthorizationHeader failed. The header provided appears invalid as it doesn't have name & value");
+            }
+        } else {
+            consoleLog("setAuthorizationHeader failed. No header object provided");
+        }
     }
 
     function partial(fn /*, args...*/) {
@@ -624,6 +638,11 @@
         // "withCredentials" only exists on XMLHTTPRequest2 objects.
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-type", "application/json");
+        
+        // if we have an auth header then add it to the request
+        if(authHeader){
+            xhr.setRequestHeader(authHeader);
+        }
         
       } else if (typeof XDomainRequest != "undefined") {
     
