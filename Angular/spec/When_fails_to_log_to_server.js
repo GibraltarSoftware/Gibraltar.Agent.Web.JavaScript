@@ -32,12 +32,20 @@ describe("When fails to log to server", function(){
     
 	it('Should keep message in local storage', inject(function($httpBackend, $timeout){
         $scope.logMessage("1st message");
-        $httpBackend.when('POST',expectedUrl).respond(500);
+        $httpBackend.when('POST',expectedUrl).respond(401);
         $timeout.flush();
         $httpBackend.flush();
         expect(localStorage.length).toEqual(1);			
 	}));
 	
+	it('Should drop message from local storage if error received from server', inject(function($httpBackend, $timeout){
+        $scope.logMessage("1st message");
+        $httpBackend.when('POST',expectedUrl).respond(500);
+        $timeout.flush();
+        $httpBackend.flush();
+        expect(localStorage.length).toEqual(0);			
+	}));    
+    
     it('Should send all messages in local storage', inject(function($httpBackend, $timeout){
         var data;
         $httpBackend.when('POST',expectedUrl).respond(200);
