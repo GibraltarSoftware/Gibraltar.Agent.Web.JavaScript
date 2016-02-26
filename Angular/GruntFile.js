@@ -14,7 +14,11 @@ module.exports = function(grunt){
 			debug: '_SpecRunner.html'
 		},
 		jshint: {
-			all:['src/Loupe.Angular.Agent.js']
+            options:{
+				reporter: require('jshint-stylish'),
+				jshintrc: '.jshintrc'
+			},
+			target:['src/Loupe.Angular.Agent.js']
 		},
 		copy: {
 			main: {
@@ -91,6 +95,7 @@ module.exports = function(grunt){
 	grunt.loadNpmTasks('grunt-contrib-jasmine');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
+    grunt.registerTask('analyse', ['jshint']);
 	grunt.registerTask('debug',['clean:debug', 'jasmine:debug:build', 'connect:debug']);
 	grunt.registerTask('test',['connect:server','jasmine:unit']);
 	grunt.registerTask('default',['clean','copy', 'uglify','connect:server', 'jasmine:build']);
