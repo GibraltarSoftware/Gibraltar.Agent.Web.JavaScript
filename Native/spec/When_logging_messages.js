@@ -92,15 +92,5 @@
 
         loupe.write(loupe.logMessageSeverity.information, 'test', 'test logs message','test log description including parameter {0}',['test'],null, 'with details', methodSourceInfo);
     }
-
-    function requestComplete(done) {
-        if (requests.length > 0) {
-            requests[0].respond(204);
-            done();
-        } else {
-            setTimeout(requestComplete, 10, done);
-        }
-        
-    }
-
+    
 });

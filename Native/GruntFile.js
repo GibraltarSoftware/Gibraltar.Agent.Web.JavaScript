@@ -15,7 +15,11 @@ module.exports = function(grunt){
 			test: 'node_modules/grunt-contrib-jasmine/tasks/jasmine.js'
 		},
 		jshint: {
-			all:['src/Loupe.JavaScript.Agent.js']
+            options:{
+				reporter: require('jshint-stylish'),
+				jshintrc: '.jshintrc'
+			},            
+			target:['src/Loupe.JavaScript.Agent.js']
 		},
 		copy: {
 			main: {

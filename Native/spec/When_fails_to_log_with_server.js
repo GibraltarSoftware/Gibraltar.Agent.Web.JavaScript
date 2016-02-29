@@ -12,9 +12,23 @@ describe("When fails to log with server", function(){
         messageFn.init(common.requests());
     });
 	
-	it('Should keep message in local storage', function(done){
+    it('Should drop message from local storage', function(done){
 		
 		messageFn.setResponseCodes([500]);
+		
+		loupe.information('test', 'test logs message','test log description');
+       
+		messageFn.waitToBeLogged(function() {    
+            expect(localStorage.length).toEqual(0);
+			
+			done();
+		});
+		
+	});
+    
+	it('Should keep message in local storage', function(done){
+		
+		messageFn.setResponseCodes([401]);
 		
 		loupe.information('test', 'test logs message','test log description');
        
