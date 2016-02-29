@@ -1,4 +1,9 @@
-﻿var BrowserDetect = {
+﻿/*
+ * file has several utility functions that are used in various tests as such this file
+ * is just a storage place for these functions, in future could be pulled out into ES6 modules
+ * and then the spec would import what it needed
+ */
+var BrowserDetect = {
     init: function () {
         this.browser = this.searchString(this.dataBrowser) || "Other";
         this.version = this.searchVersion(navigator.userAgent) || this.searchVersion(navigator.appVersion) || "Unknown";
@@ -159,4 +164,16 @@ function webStorageSupported() {
     } catch (e) {
       return false;
     }
+}
+
+function getLoupeMessagesFromLocalStorage(){
+    var messages = [];
+    for(var i=0; i < localStorage.length; i++){                
+       if(localStorage.key(i).indexOf('Loupe-message-') > -1){
+           var message = localStorage.getItem(localStorage.key(i));
+            messages.push(JSON.parse(message));
+       }
+    }
+    
+    return messages;
 }

@@ -14,7 +14,11 @@ module.exports = function(grunt){
 			debug: '_SpecRunner.html'
 		},
 		jshint: {
-			all:['src/Loupe.Angular.Agent.js']
+            options:{
+				reporter: require('jshint-stylish'),
+				jshintrc: '.jshintrc'
+			},
+			target:['src/Loupe.Angular.Agent.js']
 		},
 		copy: {
 			main: {

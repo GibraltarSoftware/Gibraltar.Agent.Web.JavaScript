@@ -9,7 +9,10 @@
     var agentSessionId;
     var messageStorage = [];
     var storageAvailable = storageSupported();
+    var storageFull = false;
     var corsOrigin=null;
+    var globalKeyList=[];
+    var authHeader;
     
     var logMessageSeverity = {
         none: 0,
@@ -20,6 +23,9 @@
         verbose: 16
     };
 
+    var maxRequestSize = 204800;
+    var messageInterval = 10;
+    
     createHelpers();
     setUpOnError(window);
     setUpClientSessionId();
@@ -46,7 +52,9 @@
         propagateOnError: propagateError,
         logMessageSeverity: logMessageSeverity,
         clientSessionHeader: clientSessionHeader,
-        corsOrigin: setCORSOrigin
+        corsOrigin: setCORSOrigin,
+        setAuthorizationHeader : setAuthorizationHeader,
+        resetMessageDelay: resetMessageInterval
     };
 
     window.loupe.MethodSourceInfo = function (file, method, line, column){
@@ -59,8 +67,8 @@
     function addSendMessageCommandToEventQueue(){
         // check for unsent messages on start up
         if(storageAvailable && localStorage.length || messageStorage.length){
-            setTimeout(logMessageToServer,10);
-        }        
+            setTimeout(logMessageToServer,messageInterval);
+        }
     }
 
     function setSessionId(value){
@@ -69,6 +77,18 @@
 
     function setCORSOrigin(value){
         corsOrigin = value;
+    }
+
+    function setAuthorizationHeader(header){
+        if(header){
+            if(header.name && header.value){
+                authHeader = header;
+            } else {
+                consoleLog("setAuthorizationHeader failed. The header provided appears invalid as it doesn't have name & value");
+            }
+        } else {
+            consoleLog("setAuthorizationHeader failed. No header object provided");
+        }
     }
 
     function partial(fn /*, args...*/) {
@@ -99,6 +119,11 @@
     function write(severity, category, caption, description, parameters, exception, details, methodSourceInfo) {        
         exception = sanitiseArgument(exception);
         details = sanitiseArgument(details);
+        
+        if (details && typeof details !== 'string') {
+            details = JSON.stringify(details);
+        }        
+        
         methodSourceInfo = sanitiseArgument(methodSourceInfo);
         
         if(methodSourceInfo && !(methodSourceInfo instanceof loupe.MethodSourceInfo)){
@@ -272,6 +297,15 @@
         };
     }
 
+    function checkForStorageQuotaReached(e) {
+        if (e.name === "QUOTA_EXCEEDED_ERR" || e.name === "NS_ERROR_DOM_QUOTA_REACHED" || e.name === "QuotaExceededError") {
+            storageFull = true;
+            return true;
+        }
+
+        return false;
+    }
+
     function setUpClientSessionId(){
         var currentClientSessionId = getClientSessionHeader();
         if(currentClientSessionId){
@@ -283,10 +317,14 @@
     }
 
     function storeClientSessionId(sessionIdToStore){
-        if(storageAvailable){
+        if(storageAvailable && !storageFull){
             try{
-                sessionStorage.setItem("LoupeAgentSessionId", sessionIdToStore)
+                sessionStorage.setItem("LoupeAgentSessionId", sessionIdToStore);
             } catch(e){
+                if(checkForStorageQuotaReached(e)) {
+                    return;
+                }
+                                   
                 consoleLog("Unable to store clientSessionId in session storage. " + e.message);
             }
         }
@@ -367,6 +405,10 @@
             sessionStorage.setItem("LoupeSequenceNumber", sequenceNumber);
             return true;
         } catch (e){
+            if(checkForStorageQuotaReached(e)) {
+                return;
+            }
+                        
             consoleLog("Unable to store sequence number: " + e.message);
             return false;
         }
@@ -400,15 +442,21 @@
     }
 
     function storeMessage(message){
-        if(storageAvailable) {
+        if(storageAvailable && !storageFull) {
             try{
                 localStorage.setItem("Loupe-message-" + generateUUID() ,JSON.stringify(message));
             } catch (e){
-                consoleLog("Error occured trying to add item to localStorageL " + e.message);
+                checkForStorageQuotaReached(e);             
+                consoleLog("Error occured trying to add item to localStorage: " + e.message);
                 messageStorage.push(message);
             }
         } else {
-            messageStorage.push(message);
+            
+            if (messageStorage.length === 5000) {
+                messageStorage.shift();
+            }             
+            
+            messageStorage.push(JSON.stringify(message));
         }            
     }
 
@@ -474,33 +522,187 @@
         return uuid;
     }
 
+    function truncateDetails(storedData) {
+        // we know what the normal size of our requests are (about 5k)
+        // so the remaining size is most likely to be in the details
+        // section which we will truncate
+
+        // alter details and put back on original message
+        if (storedData.message.details) {
+
+            var messageSizeWithoutDetails = storedData.size - storedData.message.details.length;
+
+            if (messageSizeWithoutDetails < maxRequestSize) {
+                var details = { message: "User supplied details truncated as log message exceeded maximum size." };
+                storedData.message.details = JSON.stringify(details);
+
+                var messageSize = JSON.stringify(storedData);
+                storedData.size = messageSize.length;
+            }
+
+        }
+
+        return storedData;
+    }
+
+    function dropMessage(storedData) {
+        removeMessagesFromStorage([storedData.key]);
+        var droppedCaption = storedData.message.caption;
+        var droppedDescription = storedData.message.description;
+
+        // check that if we try to include the caption & description it won't exceed the max request size
+        if (droppedCaption.length + droppedDescription.length < (maxRequestSize - 400)) {
+            createMessage(logMessageSeverity.error, "Loupe", "Dropped message", "Message was dropped as its size exceeded our max request size. Caption was {0} and description {1}", [droppedCaption, droppedDescription]);
+        } else {
+            if (droppedCaption.length < (maxRequestSize - 400)) {
+                createMessage(logMessageSeverity.error, "Loupe", "Dropped message", "Message was dropped as its size exceeded our max request size. Caption was {0}", [droppedCaption]);
+            } else {
+                createMessage(logMessageSeverity.error, "Loupe", "Dropped message", "Message was dropped as its size exceeded our max request size.\nUnable to log caption or description as they exceed max request size");    
+            }
+        }
+    }
+
+    function overSizeMessage(storedData) {
+        var messageTooLarge = false;
+
+        if (storedData.size > maxRequestSize) {
+
+            // we know what the normal size of our requests are (about 5k)
+            // so the remaining size is most likely to be in the details
+            // section which we will try truncate
+
+            storedData = truncateDetails(storedData);
+
+            // if message is still too large we have no option but to drop that message
+            if (storedData.size > maxRequestSize) {
+                dropMessage(storedData);
+
+                messageTooLarge = true;
+            }
+        }
+
+        return messageTooLarge;
+    }
+
+    function messageSort(a, b) {
+        var firstDate = new Date(a.message.timeStamp);
+        var secondDate = new Date(b.message.timeStamp);
+
+        if (firstDate > secondDate) {
+            return -1;
+        }
+
+        if (firstDate < secondDate) {
+            return 1;
+        }
+
+        // if the dates are the same then we use the sequence
+        // number 
+        return a.message.sequence - b.message.sequence;
+    }
+
     function getMessagesToSend(){
         var messages=[];
         var keys =[];
-        
+        var moreMessagesInStorage=false;
+        var messagesFromStorage = [];
+
         if(messageStorage.length){
-            messages = messageStorage.slice();
+            messagesFromStorage.push({
+                key: null,
+                message: JSON.parse(messageStorage[j]),
+                size: messageStorage[j].length
+            });
             messageStorage.length = 0;
         } 
         
         if(storageAvailable){
-            // look for messages in localStorage and add to messages array
-    		for(var i=0; i < localStorage.length; i++){
-    			if(localStorage.key(i).indexOf('Loupe-message-') > -1){
-                    keys.push(localStorage.key(i));
-    				messages.push(JSON.parse(localStorage.getItem(localStorage.key(i))));	
-    			}
-    		}
-            // sort the messages by their sequence
-            if(messages.length && messages.length > 1){
-                messages.sort(function(a,b){return a.sequence - b.sequence;});
+
+            // because local storage isn't structured we cannot simply read
+            // the first 10 messages as we have no idea if they are the ones 
+            // we should send.  So we have to read all of the messages in
+            // before we can sort them to ensure we get the right ones and
+            // then select the top 10 messages
+                            
+            for(var i=0; i < localStorage.length; i++){
+                
+                if(localStorage.key(i).indexOf('Loupe-message-') > -1){
+                    
+                    if(globalKeyList.indexOf(localStorage.key(i)) === -1){  
+                        var message = localStorage.getItem(localStorage.key(i));
+                        
+                        messagesFromStorage.push({
+                            key: localStorage.key(i),
+                            message: JSON.parse(message),
+                            size: message.length
+                        });
+                    }
+                }
             }
         }
         
-        return [messages, keys];
+        if(messagesFromStorage.length && messagesFromStorage.length > 1){
+            messagesFromStorage.sort(messageSort);
+        }
+        
+        if(messagesFromStorage.length > 10){
+            moreMessagesInStorage = true;
+            messagesFromStorage = messagesFromStorage.splice(0,10);
+        }                
+        
+        // if we aren't using our standard message interval then we know
+        // there is a problem sending messages so we only want to send
+        // 1 message
+        if (messageInterval !== 10) {
+            messagesFromStorage = messagesFromStorage.splice(0, 1);
+        }        
+        
+        var cumulativeSize = 0;
+        for (var index = 0; index < messagesFromStorage.length; index++) {
+
+            if(overSizeMessage(messagesFromStorage[index])) {
+                continue;
+            }
+
+            cumulativeSize += messagesFromStorage[index].size;
+
+            if (cumulativeSize > maxRequestSize) {
+                break;
+            }
+
+            messages.push(messagesFromStorage[index].message);
+
+            // if its a message from memory we won't have a key
+            // so only add to the keys array when we have an 
+            // actual key
+            if (messagesFromStorage[index].key) {
+                keys.push(messagesFromStorage[index].key);
+            }
+        }
+
+        // if we have keys then add them to the global key list 
+        // to ensure we don't pick up these keys again
+        if (keys.length) {
+            Array.prototype.push.apply(globalKeyList, keys);
+        }
+        
+        
+        return [messages, keys, moreMessagesInStorage];
+    }
+
+    function removeKeysFromGlobalList(keys){
+        // remove these keys from our global key list 
+        if(globalKeyList.length && keys){
+            var position = globalKeyList.indexOf(keys[0]);
+            globalKeyList.splice(position, keys.length);
+        }                  
     }
 
     function removeMessagesFromStorage(keys){
+        if (!keys) {
+            return;
+        }        
+        
         for(var i=0; i < keys.length; i++){
           try {
               localStorage.removeItem(keys[i]);	
@@ -510,31 +712,152 @@
         }        
     }
 
+    function resetMessageInterval(interval){
+        var newInterval = interval || 10;
+        
+        if(newInterval < 10){
+            newInterval = 10;
+        }
+        
+        if(newInterval < messageInterval){
+            messageInterval = newInterval;
+        }
+    }
+
+    function setMessageInterval(callFailed) {
+
+        // on a successful call with standard interval
+        // do nothing
+        if (!callFailed && messageInterval === 10) {
+            return;
+        }
+
+        // below 10 seconds we alter the interval
+        // by factor of 10
+        if (messageInterval < 10000) {
+            if (callFailed) {
+                messageInterval = messageInterval * 10;
+            } else {
+                messageInterval = messageInterval / 10;
+
+                // check we aren't below standard internal
+                if (messageInterval < 10) {
+                    messageInterval = 10;
+                }
+            }
+
+            return;
+        }
+
+        // at 10 seconds we for failure to 30 seconds
+        if (messageInterval === 10000) {
+            if (callFailed) {
+                messageInterval = 30000;
+            } else {
+                messageInterval = 1000;
+            }
+            return;
+        }
+
+        // if at 30 secs & call succeeded we need to step
+        // down to 10 secs
+        if(!callFailed && messageInterval === 30000){
+            messageInterval = 10000;
+            return;
+        }
+
+        // at higher levels we alter the message interval
+        // by a factor of 2
+        if (callFailed) {
+            // the max interval we use is 16 min, if we've
+            // reached that then don't increase any further
+            if (messageInterval < 960000) {
+                messageInterval = messageInterval * 2;
+            }
+        } else {
+            messageInterval = messageInterval / 2;
+        }
+
+    }
+
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    }
+
     function logMessageToServer() {
         var messageDetails = getMessagesToSend();        
         var messages = messageDetails[0];
         var keys = messageDetails[1];
+        var messagesStillInStorage = messageDetails[2];
         
-        if(messages.length) {
-            var logMessage = {
-                session: {
-                   client: getPlatform(),
-                   currentAgentSessionId: agentSessionId
-                },
-                logMessages: messages
-            };
-             
-            sendMessageToServer(logMessage, keys);            
+        // no messages so exit
+        if (!messages.length) {
+            return;
+        }
+        
+        var logMessage = {
+            session: {
+                client: getPlatform(),
+                currentAgentSessionId: agentSessionId
+            },
+            logMessages: messages
+        };
+
+        var updateMessageInterval = debounce(setMessageInterval, 500);
+            
+        sendMessageToServer(logMessage, keys, messagesStillInStorage, updateMessageInterval);            
+    }
+
+    function afterRequest(callFailed, moreMessages, updateMessageInterval){
+        
+        updateMessageInterval(callFailed);
+        
+        if (storageFull && !callFailed) {
+            storageFull = false;
+        }
+
+        if(moreMessages){
+            addSendMessageCommandToEventQueue();
         }
     }
 
-    function sendMessageToServer(logMessage, keys){
+    function requestSucceeded(keys, moreMessages, updateMessageInterval){
+        removeMessagesFromStorage(keys);
+        afterRequest(false,moreMessages, updateMessageInterval);
+    }
+
+    function requestFailed(xhr, keys, moreMessages, updateMessageInterval){
+        
+        if (xhr.status === 0 || xhr.status === 401) {
+            removeKeysFromGlobalList(keys);
+        } else {
+            removeMessagesFromStorage(keys);
+        }
+        
+        consoleLog("Loupe JavaScript Logger: Failed to log to " + window.location.origin + '/loupe/log');
+        consoleLog("  Status: " + xhr.status + ": " + xhr.statusText);
+        
+        afterRequest(true,moreMessages, updateMessageInterval);       
+    }
+
+    function sendMessageToServer(logMessage, keys, moreMessages, updateMessageInterval){
         try {
             
             var origin = corsOrigin || window.location.origin;
             origin = stripTrailingSlash(origin);
             
-            var xhr = createCORSRequest(origin + '/loupe/log')
+            var xhr = createCORSRequest(origin + '/loupe/log');
             if(!xhr){
                 consoleLog("Loupe JavaScript Logger: No XMLHttpRequest; error cannot be logged to Loupe");
                 return false;                
@@ -544,20 +867,14 @@
                         
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
-                    // finished loading
-                    if (xhr.status < 200 || xhr.status > 206) {
-                        consoleLog("Loupe JavaScript Logger: Failed to log to " + window.location.origin + '/loupe/log');
-                        consoleLog("  Status: " + xhr.status + ": " + xhr.statusText);
-                    }
-                    
-                    // if the call was sucessful and we have keys to items in storage
-                    // now we remove them
-                    if(xhr.status >= 200 && xhr.status <= 204 && keys.length){
-                        removeMessagesFromStorage(keys);
+                    if(xhr.status >= 200 && xhr.status <= 204){
+                        requestSucceeded(keys, moreMessages, updateMessageInterval)
+                    } else{
+                        requestFailed(xhr, keys, moreMessages, updateMessageInterval);
                     }
                 }
             };
-
+            
             xhr.send(JSON.stringify(logMessage));
 
         } catch (e) {
@@ -585,6 +902,11 @@
         // "withCredentials" only exists on XMLHTTPRequest2 objects.
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-type", "application/json");
+        
+        // if we have an auth header then add it to the request
+        if(authHeader){
+            xhr.setRequestHeader(authHeader.name, authHeader.value);
+        }
         
       } else if (typeof XDomainRequest != "undefined") {
     

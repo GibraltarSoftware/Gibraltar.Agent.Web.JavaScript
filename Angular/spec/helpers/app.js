@@ -1,4 +1,8 @@
-﻿var app = angular.module('testApp', ["Loupe.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
+﻿/*
+ * This file contains the various test modules and controllers used by the tests.
+ * The testCommon function will load these for the test (usually called in a before in the test)
+ */
+var app = angular.module('testApp', ["Loupe.Angular", "ngRoute"]).config(['$routeProvider', function ($routeProvider) {
     $routeProvider.
         when('/', { controller: "TestCtrl" });
 }]);

@@ -34,6 +34,8 @@ function testCommon() {
             beenCalled++;
         }
 
+        // we check if we have a reqeust or exceeded number
+        // of times we should be called
         if (requests.length > 0 || beenCalled > 4) {
             if(requests.length){
                 var code = 204;
@@ -47,6 +49,8 @@ function testCommon() {
             
             done();
         } else {
+            // no requests & not hit max number of times
+            // called so use setTimeout to wait 10 ms
             setTimeout(requestComplete, 10, done, beenCalled);
         }
     }    
@@ -67,11 +71,16 @@ function testCommon() {
         return storageIsSupported;        
     }
     
+    function clearRequests(){
+        requests.length = 0;
+    }
+    
     return {
         requestComplete: requestComplete,
         requests: getRequests,
         requestBody: getRequestBody,
         setResponseCodes: setResponseCodes,
-        storageSupported: getStorageSupported
+        storageSupported: getStorageSupported,
+        clearRequests: clearRequests
     };
 }

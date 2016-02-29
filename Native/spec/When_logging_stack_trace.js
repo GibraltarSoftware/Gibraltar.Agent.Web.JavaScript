@@ -35,7 +35,7 @@
                     expectedMessage = "TypeError: 'undefined' is not an object (evaluating 'uninitializedObject.doStuff')";
                     break;
                 case "Chrome":
-                    expectedFrames = ["TypeError", "at InnerItem.throwUnitializeError", "at TestingStack.createError", "at " + window.location.origin + "/specs/When_logging_stack_trace.js"];
+                    expectedFrames = ["TypeError", "at InnerItem.throwUnitializeError", "at TestingStack.createError", "at " + window.location.origin + "/spec/When_logging_stack_trace.js"];
                     expectedMessage = "Uncaught TypeError: Cannot read property 'doStuff' of undefined";
                     break;
             }
@@ -72,7 +72,7 @@
                     expectedMessage = "Error: My custom error";
                     break;
                 case "Chrome":
-                    expectedFrames = ["Error: My custom error", "at InnerItem.throwCustomError", "at TestingStack.createCustomError", "at " + window.location.origin + "/specs/When_logging_stack_trace.js"];
+                    expectedFrames = ["Error: My custom error", "at InnerItem.throwCustomError", "at TestingStack.createCustomError", "at " + window.location.origin + "/spec/When_logging_stack_trace.js"];
                     expectedMessage = "Uncaught Error: My custom error";
                     break;
             }

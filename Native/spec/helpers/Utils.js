@@ -152,6 +152,18 @@ function createTimeStamp() {
         + ':' + pad(now.getMinutes());
 }
 
+function getLoupeMessagesFromLocalStorage(){
+    var messages = [];
+    for(var i=0; i < localStorage.length; i++){                
+       if(localStorage.key(i).indexOf('Loupe-message-') > -1){
+           var message = localStorage.getItem(localStorage.key(i));
+            messages.push(JSON.parse(message));
+       }
+    }
+    
+    return messages;
+}
+
 function Messages(){
     
     var requests=[];
@@ -171,8 +183,14 @@ function Messages(){
     
     this.waitToBeLogged = function waitForMessageRecieved(fn){
 
+        // we want to wait until we receive
+        // a request, once we have we set the
+        // appropriate response code and execute
+        // the function passed in
         sometimeWhen(function () { 
             if(requests.length){
+                
+                // default to 204 which our std response code
                 var code = 204;
                 
                 if(responseCodes.length){
@@ -187,6 +205,8 @@ function Messages(){
             }, fn);        
     };   
     
+    // function that will wait for a test condition to be 
+    // true before calling another function
     function sometimeWhen(test, then){
         async(function () {
             if ( test() ) {
@@ -197,6 +217,10 @@ function Messages(){
         });        
     }
     
+    // name is a bit of a misnomer
+    // not really async as would normally
+    // think, more a delay i.e. wait 10 ms
+    // then excute function
     function async (fn) {
         setTimeout(fn, 10);
     }    
