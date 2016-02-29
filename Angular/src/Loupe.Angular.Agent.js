@@ -45,6 +45,7 @@
             logMessageSeverity: logMessageSeverity,
             setSessionId: setSessionId,
             clientSessionHeader: clientSessionHeader,
+            resetMessageDelay: resetMessageInterval,
             MethodSourceInfo: MethodSourceInfo    
         };
         
@@ -332,6 +333,18 @@
             }
             
             removeKeysFromGlobalList(keys);
+        }
+
+        function resetMessageInterval(interval){
+            var newInterval = interval || 10;
+            
+            if(newInterval < 10){
+                newInterval = 10;
+            }
+            
+            if(newInterval < messageInterval){
+                messageInterval = newInterval;
+            }
         }
 
         function setMessageInterval(callFailed) {
