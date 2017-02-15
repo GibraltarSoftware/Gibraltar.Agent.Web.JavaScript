@@ -1342,8 +1342,10 @@
                     var code = "", line, maxLines = Math.min(lineNo, 20), m, commentPos;
                     for (var i = 0; i < maxLines; ++i) {
                         // lineNo is 1-based, source[] is 0-based
-                        line = source[lineNo - i - 1];
-                        commentPos = line.indexOf('//');
+
+                        line = source[Number(lineNo) - i - 1];
+                        commentPos = line ? line.indexOf('//') : -1;
+
                         if (commentPos >= 0) {
                             line = line.substr(0, commentPos);
                         }
